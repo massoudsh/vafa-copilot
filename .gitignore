@@ -1,3 +1,6 @@
+# Noqte Platform
+.vibe/
+
 .noqte/
 __pycache__/
 *.pyc
