@@ -1,0 +1,13 @@
+conv_id,customer_id,channel,date,intent_tag,text
+V001,C001,instagram_dm,2026-07-22,price_question,قیمت این کیف چقدره؟ تخفیف هم دارید؟
+V002,C001,instagram_dm,2026-07-20,price_question,اگه بازم بگیرم تخفیف می‌دید؟
+V003,C002,whatsapp,2026-07-17,shipping_question,ارسالش رایگانه یا هزینه داره؟
+V004,C003,instagram_dm,2026-07-21,shipping_question,پست به اصفهان چند روز طول می‌کشه؟
+V005,C005,instagram_dm,2026-07-23,price_question,این عینک اورجیناله؟ قیمتش با تخفیف چنده؟
+V006,C005,instagram_dm,2026-07-15,price_question,گرون‌تر از جای دیگه‌ست، تخفیف نمی‌دید؟
+V007,C009,sms,2026-07-19,payment_question,میشه قسطی پرداخت کنم؟
+V008,C009,sms,2026-06-10,payment_question,امکان پرداخت اقساطی دارید؟
+V009,C011,instagram_dm,2026-07-22,shipping_question,هزینه ارسال به شیراز چقدره؟
+V010,C008,whatsapp,2026-05-10,complaint,سفارش قبلیم دیر رسید
+V011,C010,whatsapp,2026-06-20,price_question,باز هم کد تخفیف دارید؟
+V012,C010,whatsapp,2026-06-25,price_question,چرا هر هفته پیام تخفیف می‌فرستید؟

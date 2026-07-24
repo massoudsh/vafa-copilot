@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>وفا | کوپایلوت هوشمند رشد و حفظ مشتری برای خرده‌فروشی</title>
+<meta name="description" content="وفا به‌جای تخفیف کور، برای هر مشتری بهترین اقدام بعدی را پیشنهاد می‌دهد — چه کسی، چه زمانی، از چه کانالی، با چه پیشنهادی.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B1B22;
+    --muted:#6B6B78;
+    --bg:#FBF9F6;
+    --card:#FFFFFF;
+    --accent:#1E6F50;
+    --accent-dark:#123D2C;
+    --accent-soft:#E7F3EC;
+    --gold:#C9A24B;
+    --border:#E9E4DB;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Vazirmatn', Tahoma, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.9;
+    direction:rtl;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+  header{position:sticky;top:0;background:rgba(251,249,246,0.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:20;}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--accent-dark);}
+  .brand .dot{width:12px;height:12px;border-radius:50%;background:var(--accent);}
+  .nav a.cta{
+    background:var(--accent);color:#fff;padding:10px 22px;border-radius:999px;
+    font-weight:600;font-size:14px;text-decoration:none;
+  }
+  nav ul{list-style:none;display:flex;gap:28px;font-size:14px;color:var(--muted);}
+  nav ul a{color:var(--muted);text-decoration:none;}
+  nav ul a:hover{color:var(--accent-dark);}
+  .navlinks{display:flex;align-items:center;gap:28px;}
+
+  .hero{padding:88px 0 64px;}
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--accent-dark);
+    padding:6px 16px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:24px;
+  }
+  h1{font-size:44px;font-weight:800;line-height:1.5;color:var(--accent-dark);max-width:820px;}
+  h1 span{color:var(--accent);}
+  .lead{font-size:18px;color:var(--muted);max-width:680px;margin-top:20px;}
+  .hero-actions{display:flex;gap:14px;margin-top:36px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--accent);color:#fff;padding:14px 30px;border-radius:12px;font-weight:700;
+    text-decoration:none;font-size:15px;box-shadow:0 8px 20px -6px rgba(30,111,80,0.45);
+  }
+  .btn-secondary{
+    background:transparent;color:var(--accent-dark);padding:14px 30px;border-radius:12px;font-weight:700;
+    text-decoration:none;font-size:15px;border:1.5px solid var(--border);
+  }
+
+  .persona-strip{display:flex;gap:14px;flex-wrap:wrap;margin-top:56px;}
+  .chip{background:var(--card);border:1px solid var(--border);border-radius:999px;padding:10px 18px;font-size:13.5px;color:var(--muted);}
+  .chip b{color:var(--ink);font-weight:600;}
+
+  section{padding:72px 0;}
+  .section-head{max-width:640px;margin-bottom:44px;}
+  .section-kicker{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.02em;margin-bottom:10px;}
+  h2{font-size:30px;font-weight:800;color:var(--accent-dark);}
+  .section-head p{color:var(--muted);margin-top:12px;font-size:15.5px;}
+
+  .problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .problem-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:26px;}
+  .problem-card .num{font-size:13px;color:var(--gold);font-weight:700;margin-bottom:12px;}
+  .problem-card h3{font-size:17px;font-weight:700;margin-bottom:8px;}
+  .problem-card p{color:var(--muted);font-size:14px;}
+
+  .flow{background:var(--accent-dark);border-radius:24px;padding:48px 40px;color:#fff;}
+  .flow h2{color:#fff;}
+  .flow .section-head p{color:#C9D8CF;}
+  .flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px;}
+  .flow-step{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:20px;}
+  .flow-step .stepnum{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;margin-bottom:14px;}
+  .flow-step h4{font-size:15px;font-weight:700;margin-bottom:6px;}
+  .flow-step p{font-size:13px;color:#C9D8CF;}
+
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .feature-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;}
+  .feature-icon{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;}
+  .feature-card h3{font-size:16px;font-weight:700;margin-bottom:8px;}
+  .feature-card p{color:var(--muted);font-size:14px;}
+
+  .demo{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:0;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;}
+  .demo-left{padding:44px;}
+  .demo-left .section-kicker{margin-bottom:10px;}
+  .demo-left h2{font-size:26px;}
+  .demo-left p{color:var(--muted);margin-top:12px;font-size:14.5px;}
+  .demo-right{background:#12161A;padding:32px;color:#E8EAE6;font-family:'SFMono-Regular',Consolas,monospace;font-size:12.5px;overflow-x:auto;direction:ltr;text-align:left;}
+  .demo-right pre{white-space:pre-wrap;line-height:1.8;}
+  .tag-high{color:#FF8A80;}
+  .tag-med{color:#FFD180;}
+  .tag-low{color:#A5D6A7;}
+
+  .cta-band{background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dark) 100%);border-radius:24px;padding:56px 44px;color:#fff;text-align:center;}
+  .cta-band h2{color:#fff;font-size:28px;}
+  .cta-band p{color:#DCEBE3;margin-top:12px;max-width:520px;margin-inline:auto;}
+  .cta-band .hero-actions{justify-content:center;margin-top:28px;}
+  .cta-band .btn-primary{background:#fff;color:var(--accent-dark);box-shadow:none;}
+  .cta-band .btn-secondary{color:#fff;border-color:rgba(255,255,255,0.35);}
+
+  footer{border-top:1px solid var(--border);padding:32px 0;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+
+  @media (max-width:860px){
+    h1{font-size:32px;}
+    .problem-grid,.features{grid-template-columns:1fr;}
+    .flow-steps{grid-template-columns:1fr 1fr;}
+    .demo{grid-template-columns:1fr;}
+    nav ul{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="dot"></span> وفا</div>
+    <div class="navlinks">
+      <ul>
+        <li><a href="#problem">مسئله</a></li>
+        <li><a href="#how">نحوه‌ی کار</a></li>
+        <li><a href="#features">امکانات</a></li>
+        <li><a href="#demo">نمونه‌ی تصمیم</a></li>
+      </ul>
+      <a class="cta" href="#waitlist">ثبت‌نام لیست انتظار</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="kicker">🌿 کوپایلوت رشد و حفظ مشتری برای خرده‌فروشی ایران</span>
+    <h1>برای هر مشتری، <span>بهترین اقدام بعدی</span> را همین امروز پیدا کن — نه یک تخفیف برای همه</h1>
+    <p class="lead">وفا داده‌ی خرید، سبد، و مکالمات اینستاگرام و واتساپت را می‌خواند و برای هر مشتری مشخص می‌کند با چه کانالی، چه زمانی و با چه پیشنهادی تماس بگیری — یادآوری، ارسال رایگان، کش‌بک، اقساط یا هیچ‌کدام.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#waitlist">درخواست دسترسی زودهنگام</a>
+      <a class="btn-secondary" href="#demo">دیدن نمونه‌ی تصمیم</a>
+    </div>
+    <div class="persona-strip">
+      <div class="chip"><b>سارا</b> فقط یادآوری می‌خواهد</div>
+      <div class="chip"><b>علی</b> به ارسال رایگان حساس است</div>
+      <div class="chip"><b>مریم</b> بدون تخفیف هم می‌خرد</div>
+      <div class="chip"><b>حسین</b> به اقساط نیاز دارد</div>
+      <div class="chip"><b>زهرا</b> را نباید زیاد پیام داد</div>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-kicker">مسئله</div>
+      <h2>خرده‌فروش‌ها مشتری کم ندارند — تصمیم درست درباره‌ی مشتری کم دارند</h2>
+      <p>داده‌ی مشتری، خرید، مکالمه و سبد هست؛ اما کسی نیست که از دلش تصمیم بسازد. نتیجه یک حلقه‌ی معیوب است: داده‌ی بیشتر، کمپین بیشتر، تخفیف بیشتر، margin کمتر، وفاداری کمتر.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="num">۰۱</div>
+        <h3>تخفیف کور برای همه</h3>
+        <p>یک کد تخفیف عمومی برای مشتری‌ای که بدون تخفیف هم می‌خرید، یعنی سوزاندن margin بی‌دلیل.</p>
+      </div>
+      <div class="problem-card">
+        <div class="num">۰۲</div>
+        <h3>پیگیری دستی و فراموش‌شده</h3>
+        <p>سبدهای رهاشده، پرسش‌های دایرکت و مشتری‌های در آستانه‌ی ریزش بدون پاسخ به‌موقع می‌مانند.</p>
+      </div>
+      <div class="problem-card">
+        <div class="num">۰۳</div>
+        <h3>پیام زیاد به مشتری اشتباه</h3>
+        <p>بمباران پیامکی مشتری‌ای که تازه خرید کرده، هم مزاحم است هم اعتماد را از بین می‌برد.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap flow">
+    <div class="section-head">
+      <div class="section-kicker" style="color:#F0D9A0;">نحوه‌ی کار</div>
+      <h2>از داده‌ی پراکنده تا یک تصمیم قابل‌اعتماد</h2>
+      <p>هر تصمیم با دلیل روشن همراه است — نه جعبه‌سیاه؛ چیزی که فروشنده‌ی ایرانی بتواند به آن اعتماد کند.</p>
+    </div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="stepnum">۱</div>
+        <h4>خواندن سیگنال</h4>
+        <p>خرید، سبد رهاشده، مکالمه‌ی دایرکت/واتساپ، زمان‌بندی خرید</p>
+      </div>
+      <div class="flow-step">
+        <div class="stepnum">۲</div>
+        <h4>تحلیل وضعیت مشتری</h4>
+        <p>ریسک ریزش، حساسیت به قیمت/ارسال، نیاز به اقساط، خستگی از پیام</p>
+      </div>
+      <div class="flow-step">
+        <div class="stepnum">۳</div>
+        <h4>انتخاب بهترین اقدام</h4>
+        <p>یادآوری، ارسال رایگان، کش‌بک، BNPL، دسترسی زودهنگام یا سکوت</p>
+      </div>
+      <div class="flow-step">
+        <div class="stepnum">۴</div>
+        <h4>پیام آماده‌ی ارسال</h4>
+        <p>متن فارسی طبیعی، متناسب با لحن همان کانال</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-kicker">امکانات</div>
+      <h2>یک لایه‌ی تصمیم روی داده‌هایی که همین حالا داری</h2>
+    </div>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🧭</div>
+        <h3>بهترین اقدام بعدی، قابل توضیح</h3>
+        <p>هر پیشنهاد با دلیل روشن می‌آید تا بتوانی رد یا تأیید کنی — نه یک عدد رمزآلود.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>فهم مکالمه‌ی فارسی محاوره‌ای</h3>
+        <p>پرسش قیمت، ارسال، پرداخت قسطی یا شکایت را از دل دایرکت و واتساپ تشخیص می‌دهد.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>پیشنهاد متناسب، نه تخفیف پیش‌فرض</h3>
+        <p>انتخاب بین یادآوری، ارسال رایگان، کش‌بک، bundle یا BNPL بر اساس رفتار واقعی مشتری.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔕</div>
+        <h3>احترام به آستانه‌ی پیام</h3>
+        <p>مشتری‌هایی که نباید زیاد پیام بگیرند، به‌طور خودکار از کمپین بعدی کنار گذاشته می‌شوند.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📲</div>
+        <h3>کانال درست، زمان درست</h3>
+        <p>اینستاگرام، واتساپ یا پیامک — بر اساس ترجیح واقعی هر مشتری، نه یک کانال ثابت برای همه.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>یادگیری از هر کمپین</h3>
+        <p>نتیجه‌ی هر ارسال به موتور تصمیم بازمی‌گردد تا پیشنهاد بعدی دقیق‌تر شود.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="demo">
+      <div class="demo-left">
+        <div class="section-kicker">نمونه‌ی خروجی موتور</div>
+        <h2>یک تصمیم واقعی برای یک مشتری واقعی</h2>
+        <p>مشتری سبدش را با پرسش «قسطی می‌شه؟» رها کرده. به‌جای تخفیف عمومی، وفا پیشنهاد اقساط را با دلیل مشخص برمی‌گرداند — آماده برای ارسال در همان کانال.</p>
+      </div>
+      <div class="demo-right">
+<pre>{
+  "customer": "سارا احمدی",
+  "action_type": "bnpl",
+  "channel": "instagram_dm",
+  "urgency": "<span class="tag-high">high</span>",
+  "message_fa": "سلام سارا عزیز، می‌تونید «کیف چرم
+    مدل آوا» رو الان بردارید و پرداختش رو
+    در چند قسط انجام بدید 💳",
+  "reason_fa": "سبد رهاشده + سابقه‌ی پرسش
+    از پرداخت قسطی → پیشنهاد BNPL
+    به‌جای تخفیف مستقیم."
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="waitlist">
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>خرده‌فروش یا social commerce داری؟</h2>
+      <p>وفا را روی کانال‌های فروش موجودت (اینستاگرام، واتساپ، فروشگاه‌ساز) بدون تغییر ابزار فعلی وصل می‌کنیم.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="mailto:hello@vafa.ai">درخواست دسترسی زودهنگام</a>
+        <a class="btn-secondary" href="#how">بیشتر بدان</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:12px;">
+    <span>© وفا — کوپایلوت رشد و حفظ مشتری برای خرده‌فروشی ایران</span>
+    <span>ساخته‌شده برای social commerce و آنلاین‌شاپ‌های ایرانی</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><style>
+  :root{
+    --bg:#0F1B16; --panel:#16261F; --ink:#F3F6F3; --muted:#9FB3A8;
+    --accent:#2E8B63; --accent2:#C9A24B; --line:rgba(255,255,255,.12);
+    --bg-light:#FBF9F4; --ink-light:#16231C; --muted-light:#6C7A70; --panel-light:#FFFFFF; --line-light:#E7E2D5;
+  }
+  @page{ size:1280px 720px; margin:0; }
+  *{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  html,body{ margin:0; padding:0; font-family:'Vazirmatn',sans-serif; color:var(--ink); }
+  .slide{ width:1280px; height:720px; position:relative; overflow:hidden;
+          background:var(--bg); page-break-after:always; padding:80px 96px; }
+  .slide.light{ background:var(--bg-light); color:var(--ink-light); }
+  .light .muted{ color:var(--muted-light); }
+  .muted{ color:var(--muted); }
+  .kicker{ color:var(--accent2); font-size:19px; font-weight:700; letter-spacing:.02em; }
+  h1{ font-size:66px; line-height:1.18; margin:.25em 0 0; font-weight:800; }
+  h2{ font-size:42px; line-height:1.2; margin:0 0 30px; font-weight:800; }
+  .sub{ color:var(--muted); font-size:23px; margin-top:18px; max-width:760px; }
+  ul{ list-style:none; margin:0; padding:0; }
+  li{ font-size:22px; line-height:1.65; margin:16px 0; padding-right:34px; position:relative; color:inherit; }
+  li::before{ content:""; position:absolute; right:0; top:.6em; width:11px; height:11px;
+              background:var(--accent); border-radius:3px; transform:rotate(45deg); }
+  .light li::before{ background:var(--accent); }
+  .grid2{ display:flex; gap:36px; height:100%; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .grid4{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  .col{ flex:1; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:28px 30px; }
+  .light .card{ background:var(--panel-light); border-color:var(--line-light); box-shadow:0 4px 18px -8px rgba(30,60,45,.12); }
+  .card h3{ font-size:19px; font-weight:700; margin:0 0 10px; }
+  .card p{ font-size:15px; color:var(--muted); margin:0; line-height:1.7; }
+  .light .card p{ color:var(--muted-light); }
+  .stat{ font-size:56px; font-weight:800; color:var(--accent2); line-height:1; }
+  .stat-label{ font-size:14.5px; color:var(--muted); margin-top:10px; }
+  .light .stat-label{ color:var(--muted-light); }
+  .badge{ display:inline-block; background:rgba(46,139,99,0.18); color:#7FD9AE; border:1px solid rgba(46,139,99,0.4);
+          border-radius:999px; padding:6px 16px; font-size:13px; font-weight:600; }
+  .light .badge{ background:rgba(46,139,99,0.1); color:#1E6F50; border-color:rgba(46,139,99,0.3); }
+  .footer{ position:absolute; bottom:32px; left:96px; right:96px; display:flex;
+           justify-content:space-between; color:var(--muted); font-size:15px; }
+  .light .footer{ color:var(--muted-light); }
+  .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); display:inline-block; }
+  .numcircle{ width:38px; height:38px; border-radius:50%; background:var(--accent2); color:#12261B;
+              display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; margin-bottom:14px; }
+  .center-flex{ display:flex; flex-direction:column; justify-content:center; height:100%; }
+  code.mono{ direction:ltr; text-align:left; display:block; font-family:'SFMono-Regular',Consolas,monospace;
+             font-size:14.5px; line-height:1.85; background:#0B1310; border:1px solid var(--line); border-radius:14px;
+             padding:24px 26px; color:#DCE7DF; white-space:pre-wrap; }
+</style></head><body>
+
+<!-- 1. COVER -->
+<section class="slide" style="display:flex;flex-direction:column;justify-content:center;
+     background:radial-gradient(120% 120% at 100% 0%, #1D3A2A 0%, var(--bg) 62%);">
+  <span class="badge">کوپایلوت رشد و حفظ مشتری برای خرده‌فروشی ایران</span>
+  <h1 style="margin-top:26px;">وفا<span style="color:var(--accent2);"> ·</span> Vafa</h1>
+  <div class="sub" style="font-size:26px;color:#DCE7DF;">به‌جای تخفیف کور برای همه، برای هر مشتری بهترین اقدام بعدی را پیدا می‌کنیم — چه کسی، چه زمانی، از چه کانالی، با چه پیشنهادی.</div>
+  <div class="footer"><span>Pitch Deck · نسخه‌ی اولیه</span><span><span class="dot"></span> تیر ۱۴۰۵</span></div>
+</section>
+
+<!-- 2. PROBLEM -->
+<section class="slide">
+  <div class="kicker">مسئله</div>
+  <h2 style="margin-top:14px;">خرده‌فروش‌ها مشتری کم ندارند — تصمیم درست درباره‌ی مشتری کم دارند</h2>
+  <div class="grid3">
+    <div class="card"><div class="numcircle">۰۱</div><h3>تخفیف کور برای همه</h3><p>یک کد تخفیف عمومی برای مشتری‌ای که بدون تخفیف هم می‌خرید، یعنی سوزاندن margin بی‌دلیل.</p></div>
+    <div class="card"><div class="numcircle">۰۲</div><h3>پیگیری دستی و فراموش‌شده</h3><p>سبد رهاشده، پرسش دایرکت، مشتری در آستانه‌ی ریزش — بدون پاسخ به‌موقع می‌ماند.</p></div>
+    <div class="card"><div class="numcircle">۰۳</div><h3>پیام زیاد به آدم اشتباه</h3><p>بمباران پیامکی مشتری‌ای که تازه خرید کرده، هم مزاحم است هم اعتماد را از بین می‌برد.</p></div>
+  </div>
+  <div class="sub" style="margin-top:34px;">حلقه‌ی معیوب: داده‌ی بیشتر → کمپین بیشتر → تخفیف بیشتر → margin کمتر → وفاداری کمتر.</div>
+  <div class="footer"><span>وفا · ۲</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 3. SOLUTION -->
+<section class="slide light">
+  <div class="kicker" style="color:#1E6F50;">راه‌حل</div>
+  <h2 style="margin-top:14px;">یک ایجنت تصمیم‌ساز، نه یک ابزار پیام‌رسانی دیگر</h2>
+  <div class="grid2">
+    <div class="col">
+      <ul>
+        <li>رفتار خرید، سبد، مکالمه‌ی دایرکت/واتساپ و زمان خرید هر مشتری را می‌خواند.</li>
+        <li>وضعیت هر مشتری را می‌فهمد: ریسک ریزش، حساسیت به قیمت/ارسال، نیاز به اقساط، خستگی از پیام.</li>
+        <li>بین یادآوری، ارسال رایگان، کش‌بک، BNPL، bundle یا سکوت، بهترین گزینه را انتخاب می‌کند.</li>
+        <li>پیام فارسی طبیعی، متناسب با لحن همان کانال، آماده‌ی ارسال می‌سازد.</li>
+      </ul>
+    </div>
+    <div class="col" style="display:flex;align-items:center;">
+      <div class="card" style="width:100%;">
+        <h3 style="color:#1E6F50;">اصل طراحی</h3>
+        <p>هر تصمیم با یک دلیل روشن همراه است — نه جعبه‌سیاه. فروشنده‌ی ایرانی باید بتواند تصمیم را بفهمد، تأیید یا رد کند.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>وفا · ۳</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 4. HOW IT WORKS -->
+<section class="slide">
+  <div class="kicker">نحوه‌ی کار</div>
+  <h2 style="margin-top:14px;">از داده‌ی پراکنده تا یک تصمیم قابل‌اعتماد</h2>
+  <div class="grid4">
+    <div class="card"><div class="numcircle">۱</div><h3>خواندن سیگنال</h3><p>خرید، سبد رهاشده، مکالمه، زمان‌بندی خرید</p></div>
+    <div class="card"><div class="numcircle">۲</div><h3>تحلیل وضعیت</h3><p>ریسک ریزش، حساسیت قیمت/ارسال، نیاز اقساط</p></div>
+    <div class="card"><div class="numcircle">۳</div><h3>انتخاب اقدام</h3><p>یادآوری، ارسال رایگان، کش‌بک، BNPL یا سکوت</p></div>
+    <div class="card"><div class="numcircle">۴</div><h3>ارسال پیام</h3><p>متن فارسی طبیعی، متناسب با کانال</p></div>
+  </div>
+  <div class="footer"><span>وفا · ۴</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 5. DEMO -->
+<section class="slide light">
+  <div class="kicker" style="color:#1E6F50;">نمونه‌ی خروجی موتور (MVP)</div>
+  <h2 style="margin-top:14px;">یک تصمیم واقعی برای یک مشتری واقعی</h2>
+  <div class="grid2">
+    <div class="col">
+      <p class="muted" style="font-size:18px;line-height:1.8;">مشتری سبدش را با پرسش «قسطی می‌شه؟» رها کرده. به‌جای تخفیف عمومی، وفا پیشنهاد اقساط را با دلیل مشخص برمی‌گرداند — آماده برای ارسال در همان کانال.</p>
+    </div>
+    <div class="col">
+      <code class="mono">{
+  "customer": "سارا احمدی",
+  "action_type": "bnpl",
+  "channel": "instagram_dm",
+  "urgency": "high",
+  "message_fa": "می‌تونید «کیف چرم مدل
+    آوا» رو الان بردارید و پرداختش
+    رو در چند قسط انجام بدید 💳",
+  "reason_fa": "سبد رهاشده + سابقه‌ی
+    پرسش از پرداخت قسطی → پیشنهاد
+    BNPL به‌جای تخفیف مستقیم."
+}</code>
+    </div>
+  </div>
+  <div class="footer"><span>وفا · ۵</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 6. MARKET -->
+<section class="slide">
+  <div class="kicker">بازار</div>
+  <h2 style="margin-top:14px;">social commerce ایران، بازاری بزرگ و پراکنده</h2>
+  <div class="grid3">
+    <div class="card"><div class="stat">میلیون‌ها</div><div class="stat-label">فروشگاه اینستاگرامی و آنلاین‌شاپ فعال در ایران</div></div>
+    <div class="card"><div class="stat">اکثریت</div><div class="stat-label">هنوز با تخفیف عمومی و پیگیری دستی کار می‌کنند</div></div>
+    <div class="card"><div class="stat">صفر</div><div class="stat-label">ابزار retention که مکالمه‌ی فارسی و کانال بومی را بفهمد</div></div>
+  </div>
+  <div class="sub" style="margin-top:30px;">* ارقام دقیق بازار نیاز به تحقیق بازار مستقل دارد؛ این اسلاید placeholder جهت‌گیری کلی است، نه آمار نهایی.</div>
+  <div class="footer"><span>وفا · ۶</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 7. BUSINESS MODEL -->
+<section class="slide light">
+  <div class="kicker" style="color:#1E6F50;">مدل کسب‌وکار</div>
+  <h2 style="margin-top:14px;">اشتراک SaaS + کارمزد روی فروش افزایشی</h2>
+  <div class="grid3">
+    <div class="card"><h3>اشتراک ماهانه</h3><p>بر اساس تعداد مشتری فعال فروشگاه؛ ورودی ساده برای فروشگاه‌های کوچک و متوسط.</p></div>
+    <div class="card"><h3>کارمزد موفقیت</h3><p>درصدی از فروش افزایشی که از طریق پیشنهادهای وفا محقق می‌شود — همسو با منافع فروشنده.</p></div>
+    <div class="card"><h3>افزونه‌های کانال</h3><p>اتصال رسمی واتساپ Business API و اینستاگرام به‌عنوان سرویس جانبی.</p></div>
+  </div>
+  <div class="footer"><span>وفا · ۷</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 8. MOAT -->
+<section class="slide">
+  <div class="kicker">مزیت رقابتی</div>
+  <h2 style="margin-top:14px;">چیزی که کپی کردنش راحت نیست</h2>
+  <div class="grid3">
+    <div class="card"><h3>فهم فارسی محاوره‌ای</h3><p>پرسش قیمت، ارسال یا اقساط را از دل مکالمه‌ی واقعی دایرکت و واتساپ ایرانی می‌فهمد.</p></div>
+    <div class="card"><h3>کانال‌های بومی</h3><p>اینستاگرام و واتساپ، جایی که فروش social commerce ایران واقعاً اتفاق می‌افتد.</p></div>
+    <div class="card"><h3>اثر شبکه‌ای داده</h3><p>هر تعامل و هر کمپین، مدل next-best-action را برای کل بازار دقیق‌تر می‌کند.</p></div>
+  </div>
+  <div class="footer"><span>وفا · ۸</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 9. ROADMAP -->
+<section class="slide light">
+  <div class="kicker" style="color:#1E6F50;">نقشه‌ی راه</div>
+  <h2 style="margin-top:14px;">از MVP توضیح‌پذیر تا لایه‌ی رشد افقی</h2>
+  <div class="grid4">
+    <div class="card"><div class="numcircle">۱</div><h3>MVP</h3><p>موتور rule-based + داده‌ی نمونه + API</p></div>
+    <div class="card"><div class="numcircle">۲</div><h3>پایلوت</h3><p>اتصال به یک فروشگاه‌ساز + یک segment واقعی</p></div>
+    <div class="card"><div class="numcircle">۳</div><h3>یادگیری</h3><p>وزن‌دهی از نتیجه‌ی واقعی کمپین‌ها (A/B)</p></div>
+    <div class="card"><div class="numcircle">۴</div><h3>مقیاس</h3><p>لایه‌ی افقی روی چند فروشگاه‌ساز و کانال فروش</p></div>
+  </div>
+  <div class="footer"><span>وفا · ۹</span><span><span class="dot"></span></span></div>
+</section>
+
+<!-- 10. CLOSING -->
+<section class="slide" style="display:flex;flex-direction:column;justify-content:center;
+     background:radial-gradient(120% 120% at 0% 100%, #1D3A2A 0%, var(--bg) 62%);">
+  <span class="badge">جمع‌بندی</span>
+  <h1 style="font-size:52px;margin-top:22px;">ایجنت رشد، وفاداری و فروش تکرارشونده برای تجارت خرد ایران</h1>
+  <div class="sub" style="font-size:22px;">دنبال هم‌بنیان‌گذار فنی/تجاری، پایلوت با ۳ تا ۵ فروشگاه اینستاگرامی، و بازخورد اولیه از خرده‌فروش‌ها هستیم.</div>
+  <div class="footer"><span>وفا · تماس: hello@vafa.ai</span><span><span class="dot"></span></span></div>
+</section>
+
+</body></html>
