@@ -1,0 +1,198 @@
+[
+  {
+    "customer_id": "C001",
+    "name": "سارا احمدی",
+    "action_type": "bnpl",
+    "channel": "instagram_dm",
+    "message_fa": "سلام سارا احمدی عزیز، می‌تونید «کیف چرم مدل آوا» رو الان بردارید و پرداختش رو در چند قسط انجام بدید 💳",
+    "reason_fa": "سبد رهاشده + سابقه‌ی پرسش از پرداخت قسطی یا مبلغ سبد بالا → پیشنهاد BNPL به‌جای تخفیف.",
+    "urgency": "high",
+    "context": {
+      "cart_value": "1450000"
+    }
+  },
+  {
+    "customer_id": "C002",
+    "name": "علی رضایی",
+    "action_type": "discount_timeboxed",
+    "channel": "whatsapp",
+    "message_fa": "سلام علی رضایی جان، فقط تا ۴۸ ساعت آینده یک پیشنهاد ویژه برای بازگشتتون داریم — دلمون براتون تنگ شده 🌟",
+    "reason_fa": "ریسک ریزش بالا (1.6× چرخه‌ی معمول) و مشتری غیر VIP → پیشنهاد محدودزمان برای بازگرداندن سریع.",
+    "urgency": "high",
+    "context": {
+      "churn_ratio": 1.62
+    }
+  },
+  {
+    "customer_id": "C003",
+    "name": "مریم کریمی",
+    "action_type": "monitor",
+    "channel": "none",
+    "message_fa": "",
+    "reason_fa": "سقف چهار پیام در ۳۰ روز رسیده است؛ ارسال پیشنهاد فروش متوقف می‌شود.",
+    "urgency": "low",
+    "context": {}
+  },
+  {
+    "customer_id": "C004",
+    "name": "حسین نوری",
+    "action_type": "discount_timeboxed",
+    "channel": "sms",
+    "message_fa": "سلام حسین نوری جان، فقط تا ۴۸ ساعت آینده یک پیشنهاد ویژه برای بازگشتتون داریم — دلمون براتون تنگ شده 🌟",
+    "reason_fa": "ریسک ریزش بالا (2.3× چرخه‌ی معمول) و مشتری غیر VIP → پیشنهاد محدودزمان برای بازگرداندن سریع.",
+    "urgency": "high",
+    "context": {
+      "churn_ratio": 2.29
+    }
+  },
+  {
+    "customer_id": "C005",
+    "name": "زهرا محمدی",
+    "action_type": "cashback",
+    "channel": "instagram_dm",
+    "message_fa": "سلام زهرا محمدی جان، برای تکمیل خرید «عینک آفتابی کلاسیک» 8٪ کش‌بک برای خرید بعدیتون در نظر گرفتیم 🎁",
+    "reason_fa": "سبد رهاشده + حساسیت به قیمت، اما مشتری وفادار نیست تا تخفیف مستقیم بدهیم → کش‌بک برای خرید بعدی (margin کمتر آسیب می‌بیند).",
+    "urgency": "medium",
+    "context": {
+      "cart_value": "510000"
+    }
+  },
+  {
+    "customer_id": "C006",
+    "name": "امیر حسینی",
+    "action_type": "loyalty_no_discount",
+    "channel": "whatsapp",
+    "message_fa": "سلام امیر حسینی عزیز، به‌خاطر همراهیتون، دسترسی زودتر به کالکشن جدید رو براتون فعال کردیم — بدون نیاز به هیچ کد تخفیفی 💛",
+    "reason_fa": "مشتری فعال و وفادار، بدون سیگنال حساسیت به قیمت → دسترسی زودهنگام به‌جای تخفیف تا margin حفظ شود.",
+    "urgency": "low",
+    "context": {
+      "churn_ratio": 0.78
+    }
+  },
+  {
+    "customer_id": "C007",
+    "name": "نگار صادقی",
+    "action_type": "monitor",
+    "channel": "instagram_dm",
+    "message_fa": "",
+    "reason_fa": "مشتری در چرخه‌ی سالم خرید است و سیگنال خاصی برای اقدام وجود ندارد.",
+    "urgency": "low",
+    "context": {
+      "churn_ratio": 0.63
+    }
+  },
+  {
+    "customer_id": "C008",
+    "name": "رضا کاظمی",
+    "action_type": "discount_timeboxed",
+    "channel": "whatsapp",
+    "message_fa": "سلام رضا کاظمی جان، فقط تا ۴۸ ساعت آینده یک پیشنهاد ویژه برای بازگشتتون داریم — دلمون براتون تنگ شده 🌟",
+    "reason_fa": "ریسک ریزش بالا (8.7× چرخه‌ی معمول) و مشتری غیر VIP → پیشنهاد محدودزمان برای بازگرداندن سریع.",
+    "urgency": "high",
+    "context": {
+      "churn_ratio": 8.72
+    }
+  },
+  {
+    "customer_id": "C009",
+    "name": "فاطمه یوسفی",
+    "action_type": "loyalty_no_discount",
+    "channel": "sms",
+    "message_fa": "سلام فاطمه یوسفی عزیز، به‌خاطر همراهیتون، دسترسی زودتر به کالکشن جدید رو براتون فعال کردیم — بدون نیاز به هیچ کد تخفیفی 💛",
+    "reason_fa": "مشتری فعال و وفادار، بدون سیگنال حساسیت به قیمت → دسترسی زودهنگام به‌جای تخفیف تا margin حفظ شود.",
+    "urgency": "low",
+    "context": {
+      "churn_ratio": 0.27
+    }
+  },
+  {
+    "customer_id": "C010",
+    "name": "محمد قاسمی",
+    "action_type": "suppress",
+    "channel": "none",
+    "message_fa": "",
+    "reason_fa": "مشتری در لیست «عدم ارسال پیام» است؛ هیچ پیامی ارسال نمی‌شود.",
+    "urgency": "low",
+    "context": {}
+  },
+  {
+    "customer_id": "C011",
+    "name": "لیلا عباسی",
+    "action_type": "monitor",
+    "channel": "instagram_dm",
+    "message_fa": "",
+    "reason_fa": "مشتری در چرخه‌ی سالم خرید است و سیگنال خاصی برای اقدام وجود ندارد.",
+    "urgency": "low",
+    "context": {
+      "churn_ratio": 0.06
+    }
+  },
+  {
+    "customer_id": "C012",
+    "name": "کیانوش رستمی",
+    "action_type": "reminder",
+    "channel": "whatsapp",
+    "message_fa": "سلام کیانوش رستمی جان، سبد خریدتون «کالکشن جدید» هنوز منتظرتونه 🛍️ هر وقت راحت بودید تکمیلش کنید.",
+    "reason_fa": "کمی دیرتر از چرخه‌ی معمول خرید (1.2×) → یادآوری ملایم بدون تخفیف.",
+    "urgency": "medium",
+    "context": {
+      "churn_ratio": 1.21
+    }
+  },
+  {
+    "customer_id": "C013",
+    "name": "مشتری آزمایشی بدون رضایت",
+    "action_type": "suppress",
+    "channel": "none",
+    "message_fa": "",
+    "reason_fa": "رضایت ارسال پیام در هیچ کانالی ثبت نشده است؛ هیچ پیامی ارسال نمی‌شود.",
+    "urgency": "low",
+    "context": {}
+  },
+  {
+    "customer_id": "C014",
+    "name": "مشتری آزمایشی پشتیبانی",
+    "action_type": "care",
+    "channel": "whatsapp",
+    "message_fa": "سلام مشتری آزمایشی پشتیبانی عزیز 🌿 می‌خواستیم مطمئن بشیم تجربه‌ی خریدتون خوب بوده. اگه مشکلی هست همین‌جا بگید تا سریع رسیدگی کنیم.",
+    "reason_fa": "شکایت اخیر ثبت شده؛ اولویت با پیگیری رضایت است نه ارسال کمپین فروش.",
+    "urgency": "high",
+    "context": {}
+  },
+  {
+    "customer_id": "C015",
+    "name": "مشتری آزمایشی ارسال",
+    "action_type": "free_shipping",
+    "channel": "whatsapp",
+    "message_fa": "سلام مشتری آزمایشی ارسال عزیز، «محصول آزمایشی» توی سبدتونه — امروز ارسالش رایگانه، از دست ندید 🚚",
+    "reason_fa": "سبد رهاشده + پرسش قبلی درباره‌ی هزینه‌ی ارسال → محرک ارسال رایگان به‌جای تخفیف قیمتی.",
+    "urgency": "high",
+    "context": {
+      "cart_value": "500000"
+    }
+  },
+  {
+    "customer_id": "C016",
+    "name": "مشتری آزمایشی یادآوری",
+    "action_type": "reminder",
+    "channel": "sms",
+    "message_fa": "سلام مشتری آزمایشی یادآوری جان، سبد خریدتون «محصول آزمایشی» هنوز منتظرتونه 🛍️ هر وقت راحت بودید تکمیلش کنید.",
+    "reason_fa": "سبد رهاشده بدون سیگنال حساسیت به قیمت یا ارسال → فقط یادآوری ساده، بدون تخفیف.",
+    "urgency": "medium",
+    "context": {
+      "cart_value": "450000"
+    }
+  },
+  {
+    "customer_id": "C017",
+    "name": "مشتری آزمایشی خرید تکمیل‌شده",
+    "action_type": "monitor",
+    "channel": "sms",
+    "message_fa": "",
+    "reason_fa": "مشتری در چرخه‌ی سالم خرید است و سیگنال خاصی برای اقدام وجود ندارد.",
+    "urgency": "low",
+    "context": {
+      "churn_ratio": 0.0
+    }
+  }
+]

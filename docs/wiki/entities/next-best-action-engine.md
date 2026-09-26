@@ -1,36 +1,37 @@
 # Next-Best-Action Engine
 
-> موتور rule-based قابل‌توضیح که برای هر مشتری یک اقدام بعدی (کانال + پیام + دلیل) تولید می‌کند.
+> Explainable rule-based retention recommendations with consent and marketing-frequency safeguards.
 
-## مسئولیت‌ها
-- خواندن داده‌ی مشتری، رویدادهای سبد خرید و تاریخچه‌ی مکالمه.
-- محاسبه‌ی سیگنال‌ها: نرخ ریسک ریزش (`churn_risk_ratio`)، رده‌ی وفاداری (`loyalty_tier`)، حساسیت به قیمت/ارسال/پرداخت از روی intent مکالمات، سبد رهاشده‌ی تازه (≤۳ روز)، خستگی از پیام (`messages_last_30d >= 4`).
-- انتخاب کانال ارسال با فالبک بر اساس opt-in (`pick_channel`).
-- تولید `NextBestAction` با `action_type`, `channel`, `message_fa`, `reason_fa`, `urgency`, `context`.
+## Responsibilities
+- Load customers, cart events, and tagged conversations from synthetic CSVs.
+- Select a consented channel, compute signals, and return a `NextBestAction` with Persian message and reason.
+- `decide(..., as_of=None)` and `run_all(as_of=None)` default to today's date. The CLI accepts `--as-of 2026-07-24` for reproducible mock results.
 
-## ترتیب اولویت تصمیم (خلاصه)
-جزئیات کامل قوانین: [[concepts/decision-rules]].
-1. `do_not_disturb` → `suppress` (override قطعی، هیچ پیامی ارسال نمی‌شود)
-2. شکایت اخیر (≤۴۵ روز) → `care`
-3. سبد رهاشده‌ی تازه → `bnpl` / `free_shipping` / `cashback` / `reminder` (بسته به سیگنال)
-4. ریسک ریزش بالا (>۱.۶× چرخه) → `cashback` (VIP) یا `discount_timeboxed`
-5. کمی دیرتر از چرخه → `monitor` (اگر fatigued) یا `reminder`
-6. مشتری فعال/وفادار → `loyalty_no_discount`
-7. پیش‌فرض → `monitor`
+## Decision priority
+1. Do-not-disturb or no consent: suppress, channel `none`, empty message.
+2. Complaint within 45 days: care, including fatigued customers who consent.
+3. Four or more messages in 30 days: monitor, channel `none`, no marketing message.
+4. Latest eligible abandoned cart: installment, shipping, cashback, or reminder.
+5. High churn: personalized VIP cashback or limited-time non-VIP discount.
+6. Mild churn: reminder.
+7. Active loyal customer: loyalty access; otherwise monitor.
 
-## قالب‌های پیام
-هر `action_type` یک قالب فارسی در `MESSAGE_TEMPLATES` دارد (care, reminder, free_shipping, cashback, bnpl, discount_timeboxed, loyalty_no_discount, vip_personal). `monitor` و `suppress` پیام تولید نمی‌کنند.
+## Contracts / Edge cases
+- Negative event ages are excluded. Cart window is 0–3 days; complaint window 0–45; price, shipping, and payment signals 0–30, inclusive.
+- Newer completion suppresses an older abandoned cart. Same-day completion wins because the schema has no timestamps. One cart flow per customer is assumed until cart IDs are added.
+- BNPL threshold uses the actual cart value, not historical average order value.
+- Future purchase dates produce zero churn days, not negative risk.
+- Customer aggregates remain fixed even when evaluating a different date.
+- Offer availability, import validation, auth, and dispatch remain future work in `docs/future-issues.json`.
 
-## وابستگی‌ها
-- [[entities/data-model]] — ساختار CSVهایی که موتور می‌خواند
-- [[entities/api]] — لایه‌ای که این موتور را در معرض HTTP قرار می‌دهد
-- [[concepts/decision-rules]] — منطق کامل و دلیل هر قانون
+## Dependencies
+- [[entities/data-model]] — fixture schemas and scenarios.
+- [[entities/api]] — HTTP exposure.
+- [[concepts/decision-rules]] — thresholds and precedence.
 
-## قراردادها / Edge cases
-- تاریخ «امروز» ثابت و hardcode است (`TODAY = date(2026, 7, 24)`) — برای دمو/داده‌ی نمونه؛ در production باید `date.today()` شود.
-- `do_not_disturb` همیشه اولویت اول و override قطعی روی همه‌ی قوانین دیگر است.
-- اگر مشتری در هیچ کانالی opt-in نداشته باشد، `pick_channel` مقدار `"none"` برمی‌گرداند (پیام تولید می‌شود ولی کانال ارسال معتبر نیست — باید در لایه‌ی ارسال چک شود).
-
-## منابع کد
-- `mvp/engine/next_best_action.py` — کل منطق (load, scoring, decide, run_all)
-- `mvp/engine/next_best_action.py:173` — تابع اصلی `decide()`
+## Code sources
+- `mvp/engine/next_best_action.py:110` — latest cart selection.
+- `mvp/engine/next_best_action.py:119` — time-bounded conversation signals.
+- `mvp/engine/next_best_action.py:171` — decision function.
+- `mvp/engine/next_best_action.py:288` — batch execution.
+- `mvp/test_mvp.py:17` — engine regression tests.

@@ -1,26 +1,28 @@
 # API
 
-> لایه‌ی FastAPI که موتور تصمیم را در معرض HTTP قرار می‌دهد.
+> Read-only FastAPI demo serving synthetic retention recommendations; no messages are sent.
 
-## مسئولیت‌ها
-- `GET /` — health check ساده.
-- `GET /next-best-action` — تصمیم برای همه‌ی مشتریان.
-- `GET /next-best-action/{customer_id}` — تصمیم برای یک مشتری؛ در نبود مشتری، ۴۰۴ با پیام فارسی برمی‌گرداند.
+## Routes
+- `GET /` — service status.
+- `GET /demo` — fixed snapshot date `2026-07-24`, synthetic source, customer count, action distribution, and `sends_messages: false`.
+- `GET /next-best-action` — all decisions.
+- `GET /next-best-action/{customer_id}` — one decision; missing customer returns 404 with Persian detail.
+- `/openapi.json`, `/docs`, `/redoc` — generated contracts and documentation.
 
-## اجرا
-```
-cd mvp
-pip install -r requirements.txt
-cd api && uvicorn main:app --reload --port 8000
-```
+## Contracts / Edge cases
+- Both decision routes accept optional `as_of=YYYY-MM-DD`; invalid dates return 422, omitted dates use today.
+- The date changes signal evaluation, not customer aggregate history; this is not historical backtesting.
+- Response models use the `NextBestAction` dataclass, including its OpenAPI schema.
+- CSV data is read per request, without caching or a database. No authentication: use synthetic data only.
+- Tests use in-process HTTP through TestClient; no browser or persistent server is needed.
 
-## وابستگی‌ها
-- [[entities/next-best-action-engine]] — منطق تصمیم که این API فقط آن را serialize می‌کند (`.__dict__`)
-- [[entities/data-model]] — داده‌ای که در هر request از دیسک خوانده می‌شود (بدون caching)
+## Dependencies
+- [[entities/next-best-action-engine]] — decisions and batch execution.
+- [[entities/data-model]] — synthetic CSV snapshots.
+- Runtime: FastAPI and Uvicorn; test requirements additionally include HTTPX.
 
-## قراردادها / Edge cases
-- داده‌ها (customers/cart_events/conversations) در **هر request** از فایل CSV خوانده می‌شوند — بدون cache یا دیتابیس؛ مناسب MVP، نه production در مقیاس.
-- پاسخ‌ها dataclass به dict تبدیل می‌شوند (`.__dict__`)، بدون Pydantic response model صریح.
-
-## منابع کد
-- `mvp/api/main.py` — تعریف کامل API (۳ endpoint)
+## Code sources
+- `mvp/api/main.py:21` — application metadata.
+- `mvp/api/main.py:37` — demo metadata.
+- `mvp/api/main.py:49` — decision routes and response models.
+- `mvp/test_mvp.py:111` — endpoint regression tests.

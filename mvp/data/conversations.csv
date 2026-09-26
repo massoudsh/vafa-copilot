@@ -11,3 +11,6 @@ V009,C011,instagram_dm,2026-07-22,shipping_question,هزینه ارسال به �
 V010,C008,whatsapp,2026-05-10,complaint,سفارش قبلیم دیر رسید
 V011,C010,whatsapp,2026-06-20,price_question,باز هم کد تخفیف دارید؟
 V012,C010,whatsapp,2026-06-25,price_question,چرا هر هفته پیام تخفیف می‌فرستید؟
+V013,C013,sms,2026-07-24,complaint,این مکالمه آزمایشی برای بررسی عدم ارسال بدون رضایت است
+V014,C014,whatsapp,2026-07-23,complaint,سفارش آزمایشی آسیب دیده است
+V015,C015,whatsapp,2026-07-23,shipping_question,هزینه ارسال محصول آزمایشی چقدر است؟

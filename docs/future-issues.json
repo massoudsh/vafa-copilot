@@ -1,0 +1,37 @@
+{
+  "repository": "massoudsh/vafa-copilot",
+  "publication_status": "draft_only",
+  "blocker": "GitHub CLI is unavailable; existing remote issues could not be checked for duplicates and these drafts have not been published.",
+  "issues": [
+    {
+      "title": "Add tenant isolation and authentication before connecting real customer data",
+      "priority": "P0",
+      "body": "## Problem\nThe API is intentionally public and mock-only. Loading real CSV data would expose names and personalized recommendations without authorization.\n\n## Scope\nIntroduce authenticated store membership, tenant-scoped data access, audit events without conversation text, and explicit separation of public demo fixtures from production data.\n\n## Acceptance criteria\n- Unauthenticated protected requests return 401.\n- Cross-tenant list and customer lookups reveal no data or customer existence.\n- Public demo routes cannot load production sources.\n- Automated tests cover read access, revoked membership, and cross-tenant IDs.\n\n## Dependencies\nRequired before any real-data pilot."
+    },
+    {
+      "title": "Validate imported customer data and return actionable dataset errors",
+      "priority": "P1",
+      "body": "## Problem\nCSV loaders trust bundled fixtures. Missing columns, duplicate customer IDs, invalid booleans, malformed dates, and negative amounts are not validated; some inputs silently overwrite records or cause server errors.\n\n## Scope\nDefine import schemas and validate datasets before activating a snapshot. Keep the previous valid snapshot when an import fails.\n\n## Acceptance criteria\n- Reject duplicate IDs and orphan customer references.\n- Reject invalid dates, channel values, boolean encodings, negative currency values, and non-positive purchase cycles.\n- Return row and field diagnostics without raw personal information.\n- Tests cover missing, empty, malformed, and valid files.\n\n## Dependencies\nTenant isolation before enabling external uploads."
+    },
+    {
+      "title": "Track independent carts with cart IDs and ordered event timestamps",
+      "priority": "P1",
+      "body": "## Problem\nThe current schema has customer IDs and calendar dates, but no cart IDs or timestamps. The engine conservatively treats a customer's latest completed event as closing the cart flow; this cannot distinguish multiple simultaneous carts. Same-day completion currently wins ties.\n\n## Scope\nAdd cart_id, event timestamps with timezone, and completion/abandonment event types. Select the latest eligible uncompleted cart independently of other carts.\n\n## Acceptance criteria\n- Completing cart A never suppresses abandoned cart B.\n- Completion cancels reminders for its own cart.\n- Duplicate and out-of-order events yield deterministic results.\n- Future and expired events remain excluded.\n- Import compatibility and timezone boundary tests are included.\n\n## Dependencies\nValidated ingestion schemas."
+    },
+    {
+      "title": "Derive frequency caps from a consent-aware delivery ledger",
+      "priority": "P1",
+      "body": "## Problem\nmessages_last_30d is a static mock aggregate. Recommendations do not send messages or reserve capacity; concurrent dispatchers could exceed limits once delivery is added.\n\n## Scope\nAdd a delivery ledger, atomic frequency-cap checks, idempotency keys, unsubscribe handling, and a separately documented support-contact policy. Recheck consent immediately before sending.\n\n## Acceptance criteria\n- Four marketing sends in a rolling 30-day window block further promotions.\n- Duplicate requests cannot send twice.\n- Concurrent requests cannot exceed the cap.\n- Opt-out or do-not-disturb changes invalidate pending marketing work.\n- Failure/retry semantics and complaint follow-up policy have tests.\n- All automated tests use fake channel adapters; no real messages are sent.\n\n## Dependencies\nAuthentication, tenant isolation, and approved channel integrations."
+    },
+    {
+      "title": "Add offer eligibility and margin guardrails to recommendations",
+      "priority": "P1",
+      "body": "## Problem\nMessage templates currently promise free shipping, cashback, installments, discounts, and early access without checking stock, margin, merchant capabilities, or provider eligibility. These are mock suggestions, not validated offers.\n\n## Scope\nIntroduce merchant offer configuration, budget and margin constraints, expiry dates, and a neutral reminder fallback.\n\n## Acceptance criteria\n- Disabled or unavailable incentives are never promised in messages.\n- BNPL requires provider eligibility, not just a high cart value.\n- Cashback and shipping subsidies respect a configured margin floor.\n- Expired offers are rejected and explanations identify the constraint.\n- Synthetic scenarios cover each rejected and eligible offer.\n\n## Dependencies\nValidated product and merchant data; required before real dispatch."
+    },
+    {
+      "title": "Add reproducible outcome evaluation with snapshot-aware metrics",
+      "priority": "P2",
+      "body": "## Problem\nThe as_of parameter changes signal evaluation dates, but customer aggregates remain a fixed snapshot. It is not historical replay, and no campaign outcomes exist to demonstrate retention or margin improvements.\n\n## Scope\nPersist versioned customer snapshots, decision rule versions, and synthetic delivery/conversion outcomes. Define a holdout evaluation plan before introducing learned ranking.\n\n## Acceptance criteria\n- Replaying a snapshot with its rule version is deterministic.\n- Historical evaluation excludes future purchases, messages, and aggregate updates.\n- Reports distinguish mock metrics from measured business results.\n- Conversion, incremental margin, opt-out, and complaint rates have documented denominators.\n- Dataset and endpoint tests verify no temporal leakage.\n\n## Dependencies\nOrdered event ingestion and delivery ledger."
+    }
+  ]
+}

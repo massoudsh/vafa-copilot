@@ -14,7 +14,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Optional
 
-TODAY = date(2026, 7, 24)
+DEMO_DATE = date(2026, 7, 24)
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
@@ -107,34 +107,32 @@ def pick_channel(c: Customer) -> str:
     return "none"
 
 
-def latest_abandoned_cart(events: list[dict]) -> Optional[dict]:
-    abandoned = [e for e in events if e["abandoned"] == "1"]
-    if not abandoned:
+def latest_abandoned_cart(events: list[dict], as_of: date) -> Optional[dict]:
+    eligible = [e for e in events if 0 <= (as_of - parse_date(e["date"])).days <= 3]
+    if not eligible:
         return None
-    abandoned.sort(key=lambda e: parse_date(e["date"]), reverse=True)
-    latest = abandoned[0]
-    if (TODAY - parse_date(latest["date"])).days <= 3:
-        return latest
-    return None
+    # Dates have no time component; a same-day completion takes precedence.
+    latest = max(eligible, key=lambda e: (parse_date(e["date"]), e["abandoned"] == "0"))
+    return latest if latest["abandoned"] == "1" else None
 
 
-def recent_complaint(convs: list[dict]) -> bool:
+def recent_complaint(convs: list[dict], as_of: date) -> bool:
     return any(
-        v["intent_tag"] == "complaint" and (TODAY - parse_date(v["date"])).days <= 45
+        v["intent_tag"] == "complaint" and 0 <= (as_of - parse_date(v["date"])).days <= 45
         for v in convs
     )
 
 
-def price_sensitivity_score(convs: list[dict]) -> int:
-    return sum(1 for v in convs if v["intent_tag"] == "price_question" and (TODAY - parse_date(v["date"])).days <= 30)
+def price_sensitivity_score(convs: list[dict], as_of: date) -> int:
+    return sum(1 for v in convs if v["intent_tag"] == "price_question" and 0 <= (as_of - parse_date(v["date"])).days <= 30)
 
 
-def shipping_sensitivity_score(convs: list[dict]) -> int:
-    return sum(1 for v in convs if v["intent_tag"] == "shipping_question" and (TODAY - parse_date(v["date"])).days <= 30)
+def shipping_sensitivity_score(convs: list[dict], as_of: date) -> int:
+    return sum(1 for v in convs if v["intent_tag"] == "shipping_question" and 0 <= (as_of - parse_date(v["date"])).days <= 30)
 
 
-def payment_need_score(convs: list[dict]) -> int:
-    return sum(1 for v in convs if v["intent_tag"] == "payment_question")
+def payment_need_score(convs: list[dict], as_of: date) -> int:
+    return sum(1 for v in convs if v["intent_tag"] == "payment_question" and 0 <= (as_of - parse_date(v["date"])).days <= 30)
 
 
 def loyalty_tier(c: Customer) -> str:
@@ -145,8 +143,8 @@ def loyalty_tier(c: Customer) -> str:
     return "new"
 
 
-def churn_risk_ratio(c: Customer) -> float:
-    days_since = (TODAY - c.last_purchase_date).days
+def churn_risk_ratio(c: Customer, as_of: date) -> float:
+    days_since = max((as_of - c.last_purchase_date).days, 0)
     return days_since / max(c.typical_cycle_days, 1)
 
 
@@ -170,20 +168,28 @@ def build_message(action_type: str, name: str, item: str = "", cashback_pct: int
     return template.format(name=name, item=item or "محصول موردعلاقه‌تون", cashback_pct=cashback_pct)
 
 
-def decide(c: Customer, cart_events: list[dict], convs: list[dict]) -> NextBestAction:
+def decide(c: Customer, cart_events: list[dict], convs: list[dict], as_of: Optional[date] = None) -> NextBestAction:
+    as_of = as_of or date.today()
     channel = pick_channel(c)
     fatigued = c.messages_last_30d >= 4
 
     # ۱) عدم مزاحمت صریح
     if c.do_not_disturb:
         return NextBestAction(
-            c.customer_id, c.name, "suppress", channel, "",
+            c.customer_id, c.name, "suppress", "none", "",
             "مشتری در لیست «عدم ارسال پیام» است؛ هیچ پیامی ارسال نمی‌شود.",
             "low",
         )
 
+    if channel == "none":
+        return NextBestAction(
+            c.customer_id, c.name, "suppress", "none", "",
+            "رضایت ارسال پیام در هیچ کانالی ثبت نشده است؛ هیچ پیامی ارسال نمی‌شود.",
+            "low",
+        )
+
     # ۲) شکایت اخیر — اول رسیدگی، نه فروش
-    if recent_complaint(convs):
+    if recent_complaint(convs, as_of):
         return NextBestAction(
             c.customer_id, c.name, "care", channel,
             build_message("care", c.name),
@@ -191,16 +197,23 @@ def decide(c: Customer, cart_events: list[dict], convs: list[dict]) -> NextBestA
             "high",
         )
 
+    if fatigued:
+        return NextBestAction(
+            c.customer_id, c.name, "monitor", "none", "",
+            "سقف چهار پیام در ۳۰ روز رسیده است؛ ارسال پیشنهاد فروش متوقف می‌شود.",
+            "low",
+        )
+
     tier = loyalty_tier(c)
-    price_score = price_sensitivity_score(convs)
-    shipping_score = shipping_sensitivity_score(convs)
-    payment_score = payment_need_score(convs)
-    cart = latest_abandoned_cart(cart_events)
+    price_score = price_sensitivity_score(convs, as_of)
+    shipping_score = shipping_sensitivity_score(convs, as_of)
+    payment_score = payment_need_score(convs, as_of)
+    cart = latest_abandoned_cart(cart_events, as_of)
 
     # ۳) سبد رهاشده‌ی تازه
     if cart:
         item = cart["items"]
-        if payment_score > 0 or c.avg_order_value >= 1_200_000:
+        if payment_score > 0 or int(cart["cart_value_toman"]) >= 1_200_000:
             return NextBestAction(
                 c.customer_id, c.name, "bnpl", channel,
                 build_message("bnpl", c.name, item),
@@ -228,7 +241,7 @@ def decide(c: Customer, cart_events: list[dict], convs: list[dict]) -> NextBestA
             "medium", {"cart_value": cart["cart_value_toman"]},
         )
 
-    ratio = churn_risk_ratio(c)
+    ratio = churn_risk_ratio(c, as_of)
 
     # ۴) ریسک بالای ریزش (خیلی دیرتر از چرخه‌ی معمول خریدش)
     if ratio > 1.6:
@@ -248,12 +261,6 @@ def decide(c: Customer, cart_events: list[dict], convs: list[dict]) -> NextBestA
 
     # ۵) کمی دیرتر از حد معمول
     if ratio > 1.0:
-        if fatigued:
-            return NextBestAction(
-                c.customer_id, c.name, "monitor", channel, "",
-                "کمی دیرتر از چرخه‌ی معمول اما اخیراً پیام زیاد دریافت کرده → صبر تا کاهش خستگی از پیام.",
-                "low", {"churn_ratio": round(ratio, 2)},
-            )
         return NextBestAction(
             c.customer_id, c.name, "reminder", channel,
             build_message("reminder", c.name, "کالکشن جدید"),
@@ -262,7 +269,7 @@ def decide(c: Customer, cart_events: list[dict], convs: list[dict]) -> NextBestA
         )
 
     # ۶) مشتری فعال و وفادار — نیازی به تخفیف نیست
-    if tier in ("vip", "regular") and not fatigued:
+    if tier in ("vip", "regular"):
         return NextBestAction(
             c.customer_id, c.name, "loyalty_no_discount", channel,
             build_message("loyalty_no_discount", c.name),
@@ -278,18 +285,23 @@ def decide(c: Customer, cart_events: list[dict], convs: list[dict]) -> NextBestA
     )
 
 
-def run_all() -> list[NextBestAction]:
+def run_all(as_of: Optional[date] = None) -> list[NextBestAction]:
+    as_of = as_of or date.today()
     customers = load_customers()
     cart_events = load_cart_events()
     convs = load_conversations()
     results = []
     for cid, c in customers.items():
-        results.append(decide(c, cart_events.get(cid, []), convs.get(cid, [])))
+        results.append(decide(c, cart_events.get(cid, []), convs.get(cid, []), as_of))
     return results
 
 
 if __name__ == "__main__":
+    import argparse
     import json
 
-    actions = run_all()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--as-of", type=date.fromisoformat, default=None)
+    args = parser.parse_args()
+    actions = run_all(args.as_of)
     print(json.dumps([a.__dict__ for a in actions], ensure_ascii=False, indent=2))
