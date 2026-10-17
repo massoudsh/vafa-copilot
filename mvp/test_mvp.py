@@ -128,7 +128,29 @@ class EndpointTests(unittest.TestCase):
         self.assertEqual(sum(data["action_counts"].values()), 17)
         self.assertEqual(len(data["action_counts"]), 9)
 
-    def test_batch_matches_all_individual_endpoints(self):
+    def test_analytics_summary_and_filters(self):
+        response = self.client.get("/analytics", params={"as_of": "2026-07-24"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["total_customers"], 17)
+        self.assertEqual(data["matching_customers"], 17)
+        self.assertEqual(sum(data["action_counts"].values()), 17)
+        self.assertEqual(data["high_urgency"], 6)
+
+        filtered = self.client.get("/analytics", params={"as_of": "2026-07-24", "urgency": "high"}).json()
+        self.assertEqual(filtered["matching_customers"], 6)
+        self.assertEqual(set(filtered["urgency_counts"]), {"high"})
+
+        city_filtered = self.client.get("/next-best-action", params={"as_of": "2026-07-24", "city": "تهران", "channel": "none"})
+        self.assertEqual(city_filtered.status_code, 200)
+        self.assertTrue(all(item["channel"] == "none" for item in city_filtered.json()))
+
+    def test_analytics_unknown_filter_returns_empty(self):
+        response = self.client.get("/analytics", params={"as_of": "2026-07-24", "action_type": "unknown"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["matching_customers"], 0)
+        self.assertEqual(response.json()["action_counts"], {})
+
         response = self.client.get("/next-best-action", params={"as_of": "2026-07-24"})
         self.assertEqual(response.status_code, 200)
         for action in response.json():
@@ -153,7 +175,7 @@ class EndpointTests(unittest.TestCase):
         self.assertEqual(self.client.get("/next-best-action").json(), self.client.get("/next-best-action", params={"as_of": date.today().isoformat()}).json())
 
     def test_empty_dataset(self):
-        with patch("engine.next_best_action.load_customers", return_value={}):
+        with patch("mvp.api.main.load_customers", return_value={}):
             self.assertEqual(self.client.get("/next-best-action").json(), [])
 
     def test_post_not_supported(self):

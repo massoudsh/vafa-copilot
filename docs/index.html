@@ -140,7 +140,9 @@
     nav ul{display:none;}
   }
   @media (max-width:560px){.workspace-top{align-items:flex-start;flex-direction:column;}.workspace{padding:14px;}.panel{padding:15px;}.flow{padding:32px 22px;}.flow-steps{grid-template-columns:1fr;}}
-</style>
+  .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}.metric{background:rgba(255,255,255,.64);border:1px solid rgba(255,255,255,.82);border-radius:16px;padding:12px;}.metric strong{display:block;color:var(--accent-dark);font-size:20px;}.metric span{color:var(--muted);font-size:11px;} .metric-grid + .dashboard-grid{margin-top:0;}
+  @media (max-width:560px){.metric-grid{grid-template-columns:repeat(2,1fr);}}
+
 </head>
 <body>
 
@@ -291,6 +293,12 @@
         <div class="workspace-title"><span class="status-dot" aria-hidden="true"></span><strong>مرکز تصمیم وفا</strong></div>
         <span class="workspace-meta">آخرین همگام‌سازی: امروز، ۱۰:۲۴ · داده‌ی آزمایشی</span>
       </div>
+      <div class="metric-grid" aria-label="خلاصه‌ی داشبورد">
+        <div class="metric"><strong id="metric-total">۰</strong><span>کل پیشنهادها</span></div>
+        <div class="metric"><strong id="metric-high">۰</strong><span>فوری</span></div>
+        <div class="metric"><strong id="metric-actionable">۰</strong><span>قابل اقدام</span></div>
+        <div class="metric"><strong id="metric-channels">۰</strong><span>کانال فعال</span></div>
+      </div>
       <div class="dashboard-grid">
         <div class="panel">
           <div class="panel-head">
@@ -299,6 +307,7 @@
               <button class="filter" type="button" data-filter="all" aria-pressed="true">همه</button>
               <button class="filter" type="button" data-filter="high" aria-pressed="false">فوری</button>
               <button class="filter" type="button" data-filter="care" aria-pressed="false">رسیدگی</button>
+              <button class="filter" type="button" data-filter="instagram" aria-pressed="false">اینستاگرام</button>
             </div>
           </div>
           <div class="action-list" id="action-list" aria-live="polite"></div>
@@ -364,16 +373,20 @@
 
 <script>
   const mockActions = [
-    {id:'C001', name:'سارا احمدی', action:'پیشنهاد اقساط', type:'bnpl', priority:'high', channel:'اینستاگرام', reason:'سبد رهاشده و سابقه‌ی پرسش از پرداخت قسطی.'},
-    {id:'C008', name:'رضا کاظمی', action:'پیگیری رضایت', type:'care', priority:'high', channel:'واتساپ', reason:'شکایت اخیر نیاز به رسیدگی انسانی دارد.'},
-    {id:'C005', name:'زهرا محمدی', action:'ارسال رایگان', type:'free_shipping', priority:'medium', channel:'اینستاگرام', reason:'پرسش اخیر درباره‌ی هزینه‌ی ارسال.'},
-    {id:'C012', name:'کیانوش رستمی', action:'یادآوری ملایم', type:'reminder', priority:'low', channel:'واتساپ', reason:'کمی از چرخه‌ی معمول خرید فاصله گرفته است.'}
+    {id:'C001', name:'سارا احمدی', action:'پیشنهاد اقساط', type:'bnpl', priority:'high', channel:'اینستاگرام', channelType:'instagram', reason:'سبد رهاشده و سابقه‌ی پرسش از پرداخت قسطی.'},
+    {id:'C008', name:'رضا کاظمی', action:'پیگیری رضایت', type:'care', priority:'high', channel:'واتساپ', channelType:'whatsapp', reason:'شکایت اخیر نیاز به رسیدگی انسانی دارد.'},
+    {id:'C005', name:'زهرا محمدی', action:'ارسال رایگان', type:'free_shipping', priority:'medium', channel:'اینستاگرام', channelType:'instagram', reason:'پرسش اخیر درباره‌ی هزینه‌ی ارسال.'},
+    {id:'C012', name:'کیانوش رستمی', action:'یادآوری ملایم', type:'reminder', priority:'low', channel:'واتساپ', channelType:'whatsapp', reason:'کمی از چرخه‌ی معمول خرید فاصله گرفته است.'}
   ];
   const actionList = document.querySelector('#action-list');
   const detail = document.querySelector('#action-detail');
   const filters = document.querySelectorAll('.filter');
   const renderActions = (filter = 'all') => {
-    const visible = mockActions.filter(item => filter === 'all' || item.priority === filter || item.type === filter);
+    const visible = mockActions.filter(item => filter === 'all' || item.priority === filter || item.type === filter || item.channelType === filter);
+    document.querySelector('#metric-total').textContent = visible.length.toLocaleString('fa-IR');
+    document.querySelector('#metric-high').textContent = visible.filter(item => item.priority === 'high').length.toLocaleString('fa-IR');
+    document.querySelector('#metric-actionable').textContent = visible.filter(item => item.type !== 'monitor').length.toLocaleString('fa-IR');
+    document.querySelector('#metric-channels').textContent = new Set(visible.map(item => item.channelType)).size.toLocaleString('fa-IR');
     actionList.replaceChildren();
     if (!visible.length) {
       const empty = document.createElement('p');

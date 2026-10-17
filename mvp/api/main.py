@@ -47,8 +47,61 @@ def demo():
 
 
 @app.get("/next-best-action", response_model=list[NextBestAction])
-def all_actions(as_of: AsOf = None):
-    return run_all(as_of)
+def all_actions(
+    as_of: AsOf = None,
+    action_type: str | None = Query(default=None, description="Filter by action type"),
+    urgency: str | None = Query(default=None, description="Filter by urgency: low, medium, high"),
+    channel: str | None = Query(default=None, description="Filter by channel"),
+    city: str | None = Query(default=None, description="Filter by customer city"),
+):
+    customers = load_customers()
+    cart_events = load_cart_events()
+    conversations = load_conversations()
+    actions = [
+        decide(customer, cart_events.get(customer_id, []), conversations.get(customer_id, []), as_of)
+        for customer_id, customer in customers.items()
+    ]
+    return filter_actions(actions, customers, action_type, urgency, channel, city)
+
+
+def filter_actions(actions, customers, action_type=None, urgency=None, channel=None, city=None):
+    return [
+        action for action in actions
+        if (action_type is None or action.action_type == action_type)
+        and (urgency is None or action.urgency == urgency)
+        and (channel is None or action.channel == channel)
+        and (city is None or customers[action.customer_id].city == city)
+    ]
+
+
+@app.get("/analytics")
+def analytics(
+    as_of: AsOf = None,
+    action_type: str | None = Query(default=None, description="Filter by action type"),
+    urgency: str | None = Query(default=None, description="Filter by urgency: low, medium, high"),
+    channel: str | None = Query(default=None, description="Filter by channel"),
+    city: str | None = Query(default=None, description="Filter by customer city"),
+):
+    customers = load_customers()
+    cart_events = load_cart_events()
+    conversations = load_conversations()
+    actions = [
+        decide(customer, cart_events.get(customer_id, []), conversations.get(customer_id, []), as_of)
+        for customer_id, customer in customers.items()
+    ]
+    filtered = filter_actions(actions, customers, action_type, urgency, channel, city)
+    return {
+        "snapshot_date": as_of or date.today(),
+        "total_customers": len(customers),
+        "matching_customers": len(filtered),
+        "actionable_customers": sum(action.action_type not in {"monitor", "suppress"} for action in filtered),
+        "high_urgency": sum(action.urgency == "high" for action in filtered),
+        "action_counts": dict(Counter(action.action_type for action in filtered)),
+        "urgency_counts": dict(Counter(action.urgency for action in filtered)),
+        "channel_counts": dict(Counter(action.channel for action in filtered)),
+        "city_counts": dict(Counter(customers[action.customer_id].city for action in filtered)),
+        "filters": {"action_type": action_type, "urgency": urgency, "channel": channel, "city": city},
+    }
 
 
 @app.get("/next-best-action/{customer_id}", response_model=NextBestAction)
