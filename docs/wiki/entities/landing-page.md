@@ -4,7 +4,7 @@
 
 ## Responsibilities
 - معرفی محصول وفا برای بازدیدکننده/سرمایه‌گذار.
-- نمایش داشبورد تعاملی نمونه با glass UI، KPIهای خلاصه، فیلتر فوریت/رسیدگی/کانال، جزئیات دلیل پیشنهاد و پنل نمایشی تأیید/زمان‌بندی/رد کمپین.
+- نمایش داشبورد تعاملی نمونه با glass UI، KPIهای خلاصه، فیلتر فوریت/رسیدگی/کانال، پنل بخش‌های RFM، امتیاز و مسیر خودکار، جزئیات دلیل پیشنهاد و پنل نمایشی تأیید/زمان‌بندی/رد کمپین.
 - انتشار روی GitHub Pages (منبع: برنچ `master`، پوشه‌ی `/docs`).
 
 ## Interaction contract
@@ -12,6 +12,8 @@
 - The data-source line reports whether live API data or local mock data is displayed.
 - Filters update visible recommendations and KPI values; selecting a row updates the detail panel and pre-fills the editable message preview.
 - Campaign approve/schedule/reject buttons only update the local status line; they never call the API or send messages.
+- In live mode the page also loads `/loyalty/segments` and `/automation` (plus points for the first 25 customers) so segment counts, points, and the loyalty status line reflect the API; selecting a segment filters both the list and the KPI cards.
+- The coupon and journey buttons call `POST /loyalty/coupons` and `POST /automation/{id}/schedule`; without a reachable API they report a mock result and state that nothing was sent. The journey call targets journey 1, which only exists after a journey was created through the API.
 - `prefers-reduced-transparency` disables blur, preserving readable content on supported systems.
 
 ## دسترسی

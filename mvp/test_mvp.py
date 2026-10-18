@@ -1,12 +1,13 @@
 import unittest
 from dataclasses import replace
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
 from mvp.api.main import app
-from mvp.api import campaigns
+from mvp.api import automation, campaigns, integrations, loyalty
+from mvp.api.automation import next_send_time
 from engine.next_best_action import (
     DEMO_DATE, churn_risk_ratio, decide, latest_abandoned_cart,
     load_cart_events, load_conversations, load_customers, payment_need_score,
@@ -276,6 +277,169 @@ class CampaignTests(unittest.TestCase):
         self.assertEqual(summary["total"], 2)
         self.assertEqual(summary["status_counts"], {"cancelled": 1, "approved": 1})
         self.assertFalse(summary["sends_messages"])
+
+
+class LoyaltyTests(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(app)
+        self.addCleanup(self.client.close)
+        for module in (loyalty,):
+            module.reset()
+            self.addCleanup(module.reset)
+
+    def test_segments_cover_every_customer_and_are_filterable(self):
+        response = self.client.get("/loyalty/segments", params={"as_of": "2026-07-24"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(sum(data["segment_counts"].values()), 17)
+        self.assertEqual(len(data["customers"]), 17)
+        filtered = self.client.get("/loyalty/segments", params={"as_of": "2026-07-24", "segment": "champion"}).json()
+        self.assertTrue(all(item["rfm_segment"] == "champion" for item in filtered["customers"]))
+        self.assertEqual(self.client.get("/loyalty/segments", params={"segment": "nope"}).status_code, 422)
+
+    def test_profile_and_unknown_customer(self):
+        profile = self.client.get("/loyalty/customers/C006", params={"as_of": "2026-07-24"}).json()
+        self.assertEqual(profile["rfm_segment"], "champion")
+        self.assertEqual(profile["segment_fa"], "وفادار ارزشمند")
+        self.assertGreaterEqual(profile["rfm_score"], 12)
+        self.assertEqual(self.client.get("/loyalty/customers/NOPE").status_code, 404)
+
+    def test_points_can_be_earned_and_converted_to_credit(self):
+        before = self.client.get("/loyalty/points", params={"customer_id": "C001", "as_of": "2026-07-24"}).json()
+        self.assertGreater(before["points_balance"], 0)
+        self.assertEqual(self.client.post("/loyalty/points", params={"customer_id": "C001"}, json={"points": 0, "reason": "x"}).status_code, 422)
+
+        earned = self.client.post("/loyalty/points", params={"customer_id": "C001", "as_of": "2026-07-24"}, json={"points": 100, "reason": "نظر مفید"})
+        self.assertEqual(earned.status_code, 201)
+        self.assertEqual(earned.json()["points_balance"], before["points_balance"] + 100)
+        self.assertEqual(self.client.post("/loyalty/points", params={"customer_id": "C001"}, json={"points": -10_000, "reason": "x"}).status_code, 422)
+
+        too_much = self.client.post("/loyalty/customers/C001/credit", json={"points": 10_000_000})
+        self.assertEqual(too_much.status_code, 422)
+        grant = self.client.post("/loyalty/customers/C001/credit", json={"points": 50})
+        self.assertEqual(grant.status_code, 201)
+        self.assertEqual(grant.json()["amount_toman"], 50 * 1_000)
+        self.assertEqual(len(self.client.get("/loyalty/customers/C001/credit").json()), 1)
+        remaining = self.client.get("/loyalty/points", params={"customer_id": "C001", "as_of": "2026-07-24"}).json()["points_balance"]
+        self.assertEqual(remaining, earned.json()["points_balance"] - 50)
+
+    def test_coupon_issue_validate_revoke(self):
+        issued = self.client.post("/loyalty/coupons", json={"customer_id": "C002", "discount_toman": 100_000, "expires_in_days": 7})
+        self.assertEqual(issued.status_code, 201)
+        code = issued.json()["code"]
+        self.assertEqual(issued.json()["status"], "active")
+        self.assertEqual(self.client.post("/loyalty/coupons", json={"customer_id": "NOPE", "discount_toman": 1000}).status_code, 404)
+        self.assertEqual(self.client.post("/loyalty/coupons", json={"customer_id": "C002", "discount_toman": 0}).status_code, 422)
+
+        valid = self.client.post(f"/loyalty/coupons/{code}/validate", json={"order_value_toman": 700_000})
+        self.assertEqual(valid.status_code, 200)
+        self.assertEqual(valid.json()["final_value_toman"], 600_000)
+        self.assertEqual(self.client.post("/loyalty/coupons/VAFA-9999/validate", json={"order_value_toman": 1}).status_code, 404)
+        self.assertEqual(self.client.post(f"/loyalty/coupons/{code}/validate", json={"order_value_toman": 0}).status_code, 422)
+
+        expired = self.client.post(f"/loyalty/coupons/{code}/validate", json={"order_value_toman": 700_000, "as_of": "2030-01-01"})
+        self.assertEqual(expired.status_code, 422)
+        self.assertEqual(self.client.get(f"/loyalty/coupons/{code}", params={"as_of": "2030-01-01"}).json()["status"], "expired")
+
+        self.assertEqual(self.client.post(f"/loyalty/coupons/{code.lower()}/revoke").json()["status"], "revoked")
+        self.assertEqual(self.client.post(f"/loyalty/coupons/{code}/validate", json={"order_value_toman": 700_000}).status_code, 422)
+
+
+class AutomationTests(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(app)
+        self.addCleanup(self.client.close)
+        automation.reset()
+        self.addCleanup(automation.reset)
+        self.journey = {
+            "name": "بازگشت سبد",
+            "trigger": "cart_abandoned",
+            "steps": [
+                {"name": "یادآوری", "delay_days": 0, "condition": "always", "message_fa": "سبدتون منتظرتونه"},
+                {"name": "پیگیری", "delay_days": 1, "condition": "always", "message_fa": "هنوز منتظرتونه"},
+                {"name": "آخرین یادآوری", "delay_days": 2, "condition": "always", "message_fa": "فردا حذف می‌شود"},
+                {"name": "پیشنهاد ویژه", "delay_days": 3, "condition": "high_urgency", "message_fa": "ویژه"},
+            ],
+        }
+
+    def test_quiet_hours_move_sends_to_morning(self):
+        self.assertEqual(next_send_time(datetime(2026, 7, 24, 23, 30)), datetime(2026, 7, 25, 9))
+        self.assertEqual(next_send_time(datetime(2026, 7, 24, 6, 0)), datetime(2026, 7, 24, 9))
+        self.assertEqual(next_send_time(datetime(2026, 7, 24, 12, 15)), datetime(2026, 7, 24, 12, 15))
+
+    def test_weekly_cap_limits_planned_sends(self):
+        journey_id = self.client.post("/automation", json=self.journey).json()["journey_id"]
+        response = self.client.post(f"/automation/{journey_id}/schedule", params={"as_of": "2026-07-24"}, json={"customer_id": "C001"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual([step["status"] for step in data["steps"]], ["planned", "planned", "capped", "capped"])
+        self.assertTrue(data["capped"])
+
+    def test_trigger_condition_and_pause(self):
+        journey_id = self.client.post("/automation", json=self.journey).json()["journey_id"]
+        not_triggered = self.client.post(f"/automation/{journey_id}/schedule", params={"as_of": "2026-07-24"}, json={"customer_id": "C003"})
+        self.assertEqual(not_triggered.status_code, 422)
+        self.assertEqual(self.client.post(f"/automation/{journey_id}/schedule", json={"customer_id": "NOPE"}).status_code, 404)
+
+        complaint = {"name": "پیگیری شکایت", "trigger": "complaint", "steps": [self.journey["steps"][0]]}
+        complaint_id = self.client.post("/automation", json=complaint).json()["journey_id"]
+        self.assertEqual(self.client.post(f"/automation/{complaint_id}/schedule", params={"as_of": "2026-07-24"}, json={"customer_id": "C014"}).status_code, 200)
+        self.assertEqual(self.client.post("/automation", json=dict(complaint, steps=[dict(complaint["steps"][0], condition="bogus")])).status_code, 422)
+
+        self.assertFalse(self.client.post(f"/automation/{journey_id}/pause").json()["enabled"])
+        self.assertEqual(self.client.post(f"/automation/{journey_id}/schedule", json={"customer_id": "C001"}).status_code, 409)
+        self.assertTrue(self.client.post(f"/automation/{journey_id}/resume").json()["enabled"])
+        self.assertEqual(len(self.client.get("/automation").json()), 2)
+        self.assertEqual(self.client.get("/automation/99").status_code, 404)
+
+
+class IntegrationTests(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(app)
+        self.addCleanup(self.client.close)
+        integrations.reset()
+        self.addCleanup(integrations.reset)
+
+    def test_scoped_token_protects_endpoint(self):
+        self.assertEqual(self.client.get("/integrations/protected/recommendations").status_code, 401)
+        self.assertEqual(self.client.post("/integrations/tokens", json={"name": "x", "scopes": ["root"]}).status_code, 422)
+        token = self.client.post("/integrations/tokens", json={"name": "داشبورد", "scopes": ["campaigns:read"]}).json()
+        denied = self.client.get("/integrations/protected/recommendations", headers={"Authorization": f"Bearer {token['token']}"})
+        self.assertEqual(denied.status_code, 403)
+        reader = self.client.post("/integrations/tokens", json={"name": "خواننده", "scopes": ["recommendations:read"]}).json()
+        allowed = self.client.get("/integrations/protected/recommendations", headers={"Authorization": f"Bearer {reader['token']}"})
+        self.assertEqual(allowed.status_code, 200)
+        self.assertEqual(len(allowed.json()), 17)
+        self.client.delete(f"/integrations/tokens/{reader['token_id']}")
+        assert self.client.get("/integrations/protected/recommendations", headers={"Authorization": f"Bearer {reader['token']}"}).status_code == 401
+
+    def test_webhook_signature_and_retry(self):
+        self.assertEqual(self.client.post("/integrations/webhooks", json={"url": "http://shop.example/hook"}).status_code, 422)
+        self.assertEqual(self.client.post("/integrations/webhooks", json={"url": "https://shop.example/hook", "events": ["bogus"]}).status_code, 422)
+        hook = self.client.post("/integrations/webhooks", json={"url": "https://shop.example/hook", "events": ["campaign.approved"]}).json()
+        ok = self.client.post(f"/integrations/webhooks/{hook['webhook_id']}/deliveries", json={"event": "campaign.approved", "payload": {"id": 1}}).json()
+        self.assertTrue(ok["delivered"])
+        self.assertEqual(ok["signature"], integrations.sign(hook["signing_secret"], integrations._deliveries[-1].body))
+        self.assertEqual(self.client.post(f"/integrations/webhooks/{hook['webhook_id']}/deliveries", json={"event": "cart.abandoned"}).status_code, 422)
+
+        failed = self.client.post(
+            f"/integrations/webhooks/{hook['webhook_id']}/deliveries",
+            params={"simulate_failure": "true"}, json={"event": "campaign.approved"},
+        ).json()
+        self.assertFalse(failed["delivered"])
+        self.assertIsNotNone(failed["next_retry_at"])
+        self.assertEqual(self.client.get("/integrations/webhooks/unknown/deliveries").status_code, 404)
+        listed = self.client.get("/integrations/webhooks").json()[0]
+        self.assertEqual((listed["deliveries"], listed["retries"]), (2, 1))
+        self.assertEqual(len(self.client.get(f"/integrations/webhooks/{hook['webhook_id']}/deliveries").json()), 2)
+
+    def test_branches(self):
+        cities = self.client.get("/integrations/branches").json()
+        self.assertEqual(sum(city["customer_count"] for city in cities), 17)
+        self.assertTrue(all(not city["is_branch"] for city in cities))
+        self.assertEqual(self.client.post("/integrations/branches", json={"city": "تهران"}).json()["is_branch"], True)
+        self.assertEqual(self.client.post("/integrations/branches", json={"city": "شهر ناموجود"}).status_code, 404)
+        self.assertEqual(self.client.delete("/integrations/branches/تهران").json()["is_branch"], False)
 
 
 if __name__ == "__main__":

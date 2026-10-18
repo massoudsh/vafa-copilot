@@ -118,6 +118,16 @@
   .campaign-actions .reject{color:#98533f;}
   .campaign-status{margin-top:8px;font-size:12px;color:var(--muted);min-height:1.4em;}
   .campaign-count{font-size:12px;color:var(--muted);}
+  .seg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+  .seg-card{border:1px solid rgba(255,255,255,.82);background:rgba(255,255,255,.64);border-radius:16px;padding:12px;text-align:right;cursor:pointer;font:inherit;color:var(--ink);transition:border-color .15s ease,background .15s ease;}
+  .seg-card:hover,.seg-card[aria-pressed="true"]{border-color:rgba(11,128,101,.35);background:#fff;}
+  .seg-card strong{display:block;color:var(--accent-dark);font-size:20px;}
+  .seg-card span{font-size:11px;color:var(--muted);}
+  .loyalty-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+  .loyalty-tile{border:1px solid var(--line);border-radius:14px;padding:12px;background:rgba(246,251,249,.8);}
+  .loyalty-tile strong{display:block;font-size:15px;color:var(--accent-dark);}
+  .loyalty-tile span{font-size:11px;color:var(--muted);}
+  .preview-note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.8;}
   @media (prefers-reduced-transparency: reduce){header,.workspace,.panel,.problem-card,.feature-card{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f8fcfa;}}
   @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}.btn-primary,.btn-secondary,.nav a.cta{transition:none;}}
   .demo{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:0;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;}
@@ -149,6 +159,7 @@
   }
   @media (max-width:560px){.workspace-top{align-items:flex-start;flex-direction:column;}.workspace{padding:14px;}.panel{padding:15px;}.flow{padding:32px 22px;}.flow-steps{grid-template-columns:1fr;}}
   .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}.metric{background:rgba(255,255,255,.64);border:1px solid rgba(255,255,255,.82);border-radius:16px;padding:12px;}.metric strong{display:block;color:var(--accent-dark);font-size:20px;}.metric span{color:var(--muted);font-size:11px;} .metric-grid + .dashboard-grid{margin-top:0;}
+  @media (max-width:860px){.seg-grid{grid-template-columns:repeat(2,1fr);}.loyalty-strip{grid-template-columns:1fr;}}
   @media (max-width:560px){.metric-grid{grid-template-columns:repeat(2,1fr);}}
 
 </head>
@@ -285,6 +296,21 @@
         <h3>یادگیری از هر کمپین</h3>
         <p>نتیجه‌ی هر ارسال به موتور تصمیم بازمی‌گردد تا پیشنهاد بعدی دقیق‌تر شود.</p>
       </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏅</div>
+        <h3>باشگاه مشتریان، امتیاز و کوپن</h3>
+        <p>بخش‌بندی RFM، امتیاز خرید، اعتبار کیف پول با تاریخ انقضا و کوپن اختصاصی — همه با API قابل اعتبارسنجی.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔁</div>
+        <h3>مسیرهای خودکار با کنترل مزاحمت</h3>
+        <p>تریگر سبد رهاشده، شکایت یا ریسک ریزش؛ تأخیر و شرط هر مرحله، ساعت مجاز ۹ تا ۲۱ و سقف پیام هفتگی.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <h3>اتصال به فروشگاه و ابزارها</h3>
+        <p>توکن API با دسترسی محدود، وبهوک امضاشده با HMAC و تلاش مجدد، و تفکیک داده‌ی شعبه‌ها.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -294,7 +320,7 @@
     <div class="section-head">
       <div class="section-kicker">داشبورد نمونه</div>
       <h2>از پیشنهاد تا اقدام، در یک نگاه</h2>
-      <p>این محیط تعاملی با داده‌ی ساختگی کار می‌کند؛ فیلتر کن، یک مشتری را انتخاب کن، متن پیام را ویرایش کن و پیش‌نویس کمپین را تأیید یا رد کن. هیچ پیامی واقعاً ارسال نمی‌شود.</p>
+      <p>این محیط تعاملی با داده‌ی ساختگی کار می‌کند؛ فیلتر کن، یک مشتری را انتخاب کن، بخش RFM، امتیاز و مسیر خودکارش را ببین و پیش‌نویس کمپین را تأیید یا رد کن. هیچ پیامی واقعاً ارسال نمی‌شود.</p>
     </div>
     <div class="workspace" aria-label="داشبورد نمونه‌ی وفا">
       <div class="workspace-top">
@@ -340,6 +366,23 @@
           </div>
           <div class="detail-footer"><span>کانال</span><b>در انتظار انتخاب</b></div>
         </article>
+      </div>
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head">
+          <h3>باشگاه مشتریان بر اساس RFM</h3>
+          <span class="campaign-count">بخش فعال را انتخاب کنید تا فیلتر اعمال شود</span>
+        </div>
+        <div class="seg-grid" id="segment-grid" aria-label="بخش‌های مشتری"></div>
+        <div class="loyalty-strip">
+          <div class="loyalty-tile"><strong id="customer-segment">—</strong><span>بخش مشتری انتخاب‌شده</span></div>
+          <div class="loyalty-tile"><strong id="customer-points">—</strong><span>امتیاز باشگاه</span></div>
+          <div class="loyalty-tile"><strong id="journey-status">—</strong><span>صف خودکار</span></div>
+        </div>
+        <div class="campaign-actions">
+          <button type="button" data-loyalty="coupon">صدور کوپن این مشتری</button>
+          <button type="button" data-loyalty="journey">زمان‌بندی مسیر خودکار</button>
+        </div>
+        <p class="preview-note" id="loyalty-status" role="status">این بخش در نسخهٔ محلی نمایشی است؛ وقتی صفحه از API سرو شود، بخش‌ها، امتیاز و برنامهٔ مسیر از سرویس خوانده می‌شوند.</p>
       </div>
     </div>
   </div>
@@ -406,18 +449,42 @@
     message: action.message_fa
   });
   const mockActions = [
-    {id:'C001', name:'سارا احمدی', action:'پیشنهاد اقساط', type:'bnpl', priority:'high', channel:'اینستاگرام', channelType:'instagram', reason:'سبد رهاشده و سابقه‌ی پرسش از پرداخت قسطی.', message:'سلام سارا عزیز، می‌تونید «کیف چرم مدل آوا» رو الان بردارید و پرداختش رو در چند قسط انجام بدید.'},
-    {id:'C008', name:'رضا کاظمی', action:'پیگیری رضایت', type:'care', priority:'high', channel:'واتساپ', channelType:'whatsapp', reason:'شکایت اخیر نیاز به رسیدگی انسانی دارد.', message:'سلام رضا عزیز 🌿 می‌خواستیم مطمئن بشیم تجربه‌ی خریدتون خوب بوده. اگه مشکلی هست همین‌جا بگید تا سریع رسیدگی کنیم.'},
-    {id:'C005', name:'زهرا محمدی', action:'ارسال رایگان', type:'free_shipping', priority:'medium', channel:'اینستاگرام', channelType:'instagram', reason:'پرسش اخیر درباره‌ی هزینه‌ی ارسال.', message:'سلام زهرا عزیز، «عینک آفتابی کلاسیک» توی سبدتونه — امروز ارسالش رایگانه، از دست ندید.'},
-    {id:'C012', name:'کیانوش رستمی', action:'یادآوری ملایم', type:'reminder', priority:'low', channel:'واتساپ', channelType:'whatsapp', reason:'کمی از چرخه‌ی معمول خرید فاصله گرفته است.', message:'سلام کیانوش جان، کالکشن جدیدتون هنوز منتظرتونه. هر وقت راحت بودید سر بزنید.'}
+    {id:'C001', name:'سارا احمدی', action:'پیشنهاد اقساط', type:'bnpl', priority:'high', channel:'اینستاگرام', channelType:'instagram', segment:'champion', points:2340, reason:'سبد رهاشده و سابقه‌ی پرسش از پرداخت قسطی.', message:'سلام سارا عزیز، می‌تونید «کیف چرم مدل آوا» رو الان بردارید و پرداختش رو در چند قسط انجام بدید.'},
+    {id:'C008', name:'رضا کاظمی', action:'پیگیری رضایت', type:'care', priority:'high', channel:'واتساپ', channelType:'whatsapp', segment:'at_risk', points:380, reason:'شکایت اخیر نیاز به رسیدگی انسانی دارد.', message:'سلام رضا عزیز 🌿 می‌خواستیم مطمئن بشیم تجربه‌ی خریدتون خوب بوده. اگه مشکلی هست همین‌جا بگید تا سریع رسیدگی کنیم.'},
+    {id:'C005', name:'زهرا محمدی', action:'ارسال رایگان', type:'free_shipping', priority:'medium', channel:'اینستاگرام', channelType:'instagram', segment:'new', points:98, reason:'پرسش اخیر درباره‌ی هزینه‌ی ارسال.', message:'سلام زهرا عزیز، «عینک آفتابی کلاسیک» توی سبدتونه — امروز ارسالش رایگانه، از دست ندید.'},
+    {id:'C012', name:'کیانوش رستمی', action:'یادآوری ملایم', type:'reminder', priority:'low', channel:'واتساپ', channelType:'whatsapp', segment:'champion', points:2740, reason:'کمی از چرخه‌ی معمول خرید فاصله گرفته است.', message:'سلام کیانوش جان، کالکشن جدیدتون هنوز منتظرتونه. هر وقت راحت بودید سر بزنید.'}
   ];
+  const segmentLabels = {champion:'وفادار ارزشمند', loyal:'وفادار', new:'تازه‌وارد', at_risk:'در خطر ریزش', dormant:'غیرفعال'};
+  const segmentGrid = document.querySelector('#segment-grid');
+  const loyaltyStatus = document.querySelector('#loyalty-status');
+  let activeSegment = null;
+  let pointsByCustomer = {};
+  const renderSegments = counts => {
+    segmentGrid.replaceChildren();
+    Object.entries(segmentLabels).forEach(([key, label]) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'seg-card';
+      card.setAttribute('aria-pressed', activeSegment === key ? 'true' : 'false');
+      card.innerHTML = `<strong>${(counts[key] || 0).toLocaleString('fa-IR')}</strong><span>${label}</span>`;
+      card.addEventListener('click', () => {
+        activeSegment = activeSegment === key ? null : key;
+        renderSegments(counts);
+        renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
+      });
+      segmentGrid.append(card);
+    });
+  };
+  const mockSegmentCounts = () => mockActions.reduce((counts, item) => ({...counts, [item.segment]: (counts[item.segment] || 0) + 1}), {});
   const actionList = document.querySelector('#action-list');
   const detail = document.querySelector('#action-detail');
   const filters = document.querySelectorAll('.filter');
   const dataSource = document.querySelector('#data-source');
   let actions = mockActions;
   const renderActions = (filter = 'all') => {
-    const visible = actions.filter(item => filter === 'all' || item.priority === filter || item.type === filter || item.channelType === filter);
+    const visible = actions.filter(item =>
+      (filter === 'all' || item.priority === filter || item.type === filter || item.channelType === filter)
+      && (!activeSegment || item.segment === activeSegment));
     document.querySelector('#metric-total').textContent = visible.length.toLocaleString('fa-IR');
     document.querySelector('#metric-high').textContent = visible.filter(item => item.priority === 'high').length.toLocaleString('fa-IR');
     document.querySelector('#metric-actionable').textContent = visible.filter(item => item.type !== 'monitor').length.toLocaleString('fa-IR');
@@ -456,7 +523,43 @@
     detail.querySelector('.detail-footer b').textContent = `${item.channel} · ${item.priority === 'high' ? 'فوری' : item.priority === 'medium' ? 'متوسط' : 'کم'}`;
     messageBox.value = item.message;
     campaignStatus.textContent = 'پیش‌نویس آماده‌ی بررسی است؛ ارسال واقعی انجام نمی‌شود.';
+    document.querySelector('#customer-segment').textContent = segmentLabels[item.segment] || '—';
+    document.querySelector('#customer-segment').dataset.customerId = item.id;
+    const points = pointsByCustomer[item.id] ?? item.points;
+    document.querySelector('#customer-points').textContent = points == null ? '—' : points.toLocaleString('fa-IR');
+    document.querySelector('#journey-status').textContent = 'بدون برنامه';
   };
+  document.querySelectorAll('[data-loyalty]').forEach(button => button.addEventListener('click', async () => {
+    const customerId = document.querySelector('#customer-segment').dataset.customerId;
+    if (!customerId || !selectedAction) return;
+    if (button.dataset.loyalty === 'coupon') {
+      const response = await fetch('/loyalty/coupons', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({customer_id: customerId, discount_toman: 100000})
+      }).catch(() => null);
+      const body = response && response.ok ? await response.json() : null;
+      loyaltyStatus.textContent = body
+        ? `کوپن ${body.code} به مبلغ ۱۰۰٬۰۰۰ تومان برای ${selectedAction.name} صادر شد و تا ${body.expires_on} معتبر است.`
+        : 'حالت نمایشی: کوپن VAFA-0001 به مبلغ ۱۰۰٬۰۰۰ تومان صادر می‌شود (بدون اتصال به سرویس).';
+      return;
+    }
+    const response = await fetch(`/automation/1/schedule?as_of=${new Date().toISOString().slice(0, 10)}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({customer_id: customerId})
+    }).catch(() => null);
+    const body = response && response.ok ? await response.json() : null;
+    if (body) {
+      const planned = body.steps.filter(step => step.status === 'planned').length;
+      const blocked = body.steps.length - planned;
+      document.querySelector('#journey-status').textContent = body.capped ? 'سقف هفتگی فعال' : 'برنامه‌ریزی شد';
+      loyaltyStatus.textContent = `مسیر خودکار برای ${selectedAction.name}: ${planned.toLocaleString('fa-IR')} پیام برنامه‌ریزی شد و ${blocked.toLocaleString('fa-IR')} مرحله به‌دلیل سقف یا شرط اجرا نمی‌شود.`;
+      return;
+    }
+    document.querySelector('#journey-status').textContent = 'نمایشی';
+    loyaltyStatus.textContent = `حالت نمایشی: برای ${selectedAction.name} یک یادآوری امروز ساعت ۱۰ و یک پیگیری فردا برنامه‌ریزی می‌شود؛ مرحلهٔ سوم به‌دلیل سقف ۲ پیام در هفته اجرا نمی‌شود.`;
+  }));
   document.querySelectorAll('[data-campaign]').forEach(button => button.addEventListener('click', () => {
     if (!selectedAction) return;
     const text = messageBox.value.trim();
@@ -478,10 +581,11 @@
     filter.setAttribute('aria-pressed', 'true');
     renderActions(filter.dataset.filter);
   }));
+  renderSegments(mockSegmentCounts());
   renderActions();
 
   const loadLiveActions = async () => {
-    // Same-origin path only exists when the FastAPI app serves this page at /dashboard.
+    // Same-origin paths only exist when the FastAPI app serves this page at /dashboard.
     const response = await fetch('/next-best-action', {headers: {Accept: 'application/json'}});
     if (!response.ok) throw new Error(`status ${response.status}`);
     const payload = await response.json();
@@ -490,7 +594,23 @@
     dataSource.textContent = `داده‌ی زنده از API · ${actions.length.toLocaleString('fa-IR')} مشتری`;
     renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
   };
-  loadLiveActions().catch(() => {
+  const loadLiveLoyalty = async () => {
+    const [segments, journeys] = await Promise.all([
+      fetch('/loyalty/segments').then(response => response.ok ? response.json() : null),
+      fetch('/automation').then(response => response.ok ? response.json() : null)
+    ]);
+    if (segments) {
+      const byCustomer = Object.fromEntries(segments.customers.map(profile => [profile.customer_id, profile]));
+      actions = actions.map(item => ({...item, segment: byCustomer[item.id]?.rfm_segment, points: undefined}));
+      renderSegments(segments.segment_counts);
+    }
+    const points = await Promise.all(actions.slice(0, 25).map(item =>
+      fetch(`/loyalty/points?customer_id=${encodeURIComponent(item.id)}`).then(response => response.ok ? response.json() : null)));
+    actions.slice(0, 25).forEach((item, index) => { pointsByCustomer[item.id] = points[index]?.points_balance; });
+    if (journeys && journeys.length) loyaltyStatus.textContent = `باشگاه مشتریان و ${journeys.length.toLocaleString('fa-IR')} مسیر خودکار از سرویس خوانده شد؛ منطق ساعت مجاز ۲۱ تا ۹ و سقف ۲ پیام در هفته فعال است.`;
+    renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
+  };
+  Promise.all([loadLiveActions(), loadLiveLoyalty().catch(() => null)]).catch(() => {
     dataSource.textContent = 'داده‌ی نمونه‌ی محلی · API در دسترس نیست';
   });
 </script>

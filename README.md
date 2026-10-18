@@ -66,6 +66,27 @@ python3 -m venv .venv
 
 متن اصلی پیشنهاد در `original_message_fa` نگه داشته می‌شود تا تصمیم‌های ویرایش‌شده قابل ردیابی باشند.
 
+## باشگاه مشتریان، مسیر خودکار و اتصال‌ها
+
+سه ماژول دیگر روی همان داده‌ی ساختگی کار می‌کنند؛ وضعیتشان در حافظه است و با ری‌استارت پاک می‌شود. اعداد اعتبار و کوپن فقط محاسباتی است و روی سفارش واقعی اعمال نمی‌شود.
+
+| مسیر | کاری که انجام می‌دهد |
+|---|---|
+| `GET /loyalty/segments?as_of=2026-07-24` | بخش‌بندی RFM هر مشتری (وفادار ارزشمند، وفادار، تازه‌وارد، در خطر ریزش، غیرفعال) و شمارش هر بخش |
+| `GET /loyalty/customers/C006` | پروفایل مشتری با امتیاز RFM، بخش و نسبت ریسک ریزش |
+| `GET /loyalty/points?customer_id=C001` | موجودی امتیاز از خریدها و پاداش باشگاه |
+| `POST /loyalty/points?customer_id=C001` با `{"points": 100, "reason": "..."}` | ثبت امتیاز دستی؛ امتیاز منفی بیشتر از موجودی ۴۲۲ |
+| `POST /loyalty/customers/C001/credit` با `{"points": 50}` | تبدیل امتیاز به اعتبار کیف پول (هر امتیاز ۱۰۰۰ تومان، انقضا ۹۰ روز) |
+| `POST /loyalty/coupons` با `{"customer_id": "C002", "discount_toman": 100000}` | صدور کوپن اختصاصی؛ سقف تخفیف ۵۰۰٬۰۰۰ تومان |
+| `POST /loyalty/coupons/{code}/validate` با `{"order_value_toman": 700000}` | اعتبارسنجی کد، محاسبه‌ی مبلغ نهایی؛ منقضی/باطل‌شده ۴۲۲ |
+| `POST /automation` | ساخت مسیر خودکار با تریگر `cart_abandoned`، `complaint` یا `churn_risk` و حداکثر ۶ مرحله |
+| `POST /automation/{id}/schedule` با `{"customer_id": "C001"}` | برنامه‌ی زمانی هر مرحله؛ ساعت مجاز ۹ تا ۲۱ و سقف ۲ پیام در هفته |
+| `POST /automation/{id}/pause` و `/resume` | توقف و فعال‌سازی مسیر |
+| `POST /integrations/tokens` با `{"name": "...", "scopes": ["recommendations:read"]}` | توکن دسترسی محدود؛ مسیر `/integrations/protected/recommendations` بدون توکن ۴۰۱ و بدون دسترسی ۴۰۳ |
+| `POST /integrations/webhooks` با `{"url": "https://...", "events": ["campaign.approved"]}` | ثبت وبهوک و دریافت secret امضا |
+| `POST /integrations/webhooks/{id}/deliveries` | محاسبه‌ی امضای HMAC-SHA256 و برنامه‌ی تلاش مجدد (`?simulate_failure=true`) |
+| `GET|POST /integrations/branches` | فهرست شهرها با تعداد مشتری و علامت‌گذاری شعبه |
+
 پیش‌نویس مسئله‌های آینده با اولویت و معیار پذیرش در [`docs/future-issues.json`](docs/future-issues.json) است؛ این‌ها **در GitHub ثبت نشده‌اند**. وضعیت Issueهای آنلاین نیز در این اجرا قابل بررسی نبود. پیش از اتصال داده‌ی واقعی، احراز هویت و جداسازی فروشگاه‌ها ضروری است.
 
 ## دیدن لندینگ‌پیج

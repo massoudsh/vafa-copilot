@@ -10,9 +10,12 @@ from typing import Annotated, Optional
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 if __package__:
-    from . import campaigns
+    from . import automation, campaigns, integrations, loyalty
 else:
+    import automation
     import campaigns
+    import integrations
+    import loyalty
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,9 +32,10 @@ from engine.next_best_action import (
 
 app = FastAPI(
     title="Retail Retention Copilot — Next-Best-Action API",
-    description="Synthetic-data demo with a review-only campaign queue. Dates control signal "
-    "evaluation only; customer aggregates remain a fixed snapshot; no message is ever sent.",
-    version="0.4.0",
+    description="Synthetic-data demo with a review-only campaign queue, loyalty club, "
+    "automation journeys, and store integrations. Dates control signal evaluation only; "
+    "customer aggregates remain a fixed snapshot; no message is ever sent.",
+    version="0.5.0",
 )
 
 allow_origins = [origin.strip() for origin in os.getenv("VAFA_CORS_ORIGINS", "").split(",") if origin.strip()]
@@ -76,6 +80,9 @@ def demo():
 
 
 app.include_router(campaigns.router)
+app.include_router(loyalty.router)
+app.include_router(automation.router)
+app.include_router(integrations.router)
 
 
 @app.get("/next-best-action", response_model=list[NextBestAction])
