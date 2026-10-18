@@ -1,5 +1,6 @@
 """Mock-data API with an in-memory campaign review queue; nothing is sent."""
 
+import os
 import sys
 from collections import Counter
 from datetime import date
@@ -14,6 +15,8 @@ else:
     import campaigns
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from engine.next_best_action import (
     DEMO_DATE,
     NextBestAction,
@@ -28,8 +31,19 @@ app = FastAPI(
     title="Retail Retention Copilot — Next-Best-Action API",
     description="Synthetic-data demo with a review-only campaign queue. Dates control signal "
     "evaluation only; customer aggregates remain a fixed snapshot; no message is ever sent.",
-    version="0.3.0",
+    version="0.4.0",
 )
+
+allow_origins = [origin.strip() for origin in os.getenv("VAFA_CORS_ORIGINS", "").split(",") if origin.strip()]
+if allow_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allow_origins,
+        allow_methods=["GET", "POST", "PATCH"],
+        allow_headers=["Content-Type"],
+    )
+
+LANDING_FILE = Path(__file__).resolve().parents[2] / "landing" / "index.html"
 
 ActionType = Annotated[Optional[str], Query(description="Filter by action type")]
 Urgency = Annotated[Optional[str], Query(description="Filter by urgency: low, medium, high")]
@@ -42,6 +56,11 @@ AsOf = Annotated[date | None, Query(description="Evaluation date (YYYY-MM-DD); d
 @app.get("/")
 def root():
     return {"status": "ok", "service": "next-best-action-api"}
+
+
+@app.get("/dashboard", include_in_schema=False)
+def dashboard():
+    return FileResponse(LANDING_FILE)
 
 
 @app.get("/demo")

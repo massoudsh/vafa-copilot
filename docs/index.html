@@ -299,7 +299,7 @@
     <div class="workspace" aria-label="داشبورد نمونه‌ی وفا">
       <div class="workspace-top">
         <div class="workspace-title"><span class="status-dot" aria-hidden="true"></span><strong>مرکز تصمیم وفا</strong></div>
-        <span class="workspace-meta">آخرین همگام‌سازی: امروز، ۱۰:۲۴ · داده‌ی آزمایشی</span>
+        <span class="workspace-meta" id="data-source">داده‌ی نمونه‌ی محلی · در حال بررسی اتصال به API</span>
       </div>
       <div class="metric-grid" aria-label="خلاصه‌ی داشبورد">
         <div class="metric"><strong id="metric-total">۰</strong><span>کل پیشنهادها</span></div>
@@ -392,6 +392,19 @@
 </footer>
 
 <script>
+  const actionLabels = {care:'رسیدگی', reminder:'یادآوری', free_shipping:'ارسال رایگان', cashback:'کش‌بک', bnpl:'پیشنهاد اقساط', discount_timeboxed:'تخفیف کوتاه‌مدت', loyalty_no_discount:'دسترسی زودهنگام', monitor:'پایش', suppress:'عدم ارسال'};
+  const channelLabels = {instagram_dm:'اینستاگرام', whatsapp:'واتساپ', sms:'پیامک', none:'بدون کانال'};
+  const toDashboardItem = action => ({
+    id: action.customer_id,
+    name: action.name,
+    type: action.action_type,
+    action: actionLabels[action.action_type] || action.action_type,
+    priority: action.urgency,
+    channelType: action.channel,
+    channel: channelLabels[action.channel] || action.channel,
+    reason: action.reason_fa,
+    message: action.message_fa
+  });
   const mockActions = [
     {id:'C001', name:'سارا احمدی', action:'پیشنهاد اقساط', type:'bnpl', priority:'high', channel:'اینستاگرام', channelType:'instagram', reason:'سبد رهاشده و سابقه‌ی پرسش از پرداخت قسطی.', message:'سلام سارا عزیز، می‌تونید «کیف چرم مدل آوا» رو الان بردارید و پرداختش رو در چند قسط انجام بدید.'},
     {id:'C008', name:'رضا کاظمی', action:'پیگیری رضایت', type:'care', priority:'high', channel:'واتساپ', channelType:'whatsapp', reason:'شکایت اخیر نیاز به رسیدگی انسانی دارد.', message:'سلام رضا عزیز 🌿 می‌خواستیم مطمئن بشیم تجربه‌ی خریدتون خوب بوده. اگه مشکلی هست همین‌جا بگید تا سریع رسیدگی کنیم.'},
@@ -401,8 +414,10 @@
   const actionList = document.querySelector('#action-list');
   const detail = document.querySelector('#action-detail');
   const filters = document.querySelectorAll('.filter');
+  const dataSource = document.querySelector('#data-source');
+  let actions = mockActions;
   const renderActions = (filter = 'all') => {
-    const visible = mockActions.filter(item => filter === 'all' || item.priority === filter || item.type === filter || item.channelType === filter);
+    const visible = actions.filter(item => filter === 'all' || item.priority === filter || item.type === filter || item.channelType === filter);
     document.querySelector('#metric-total').textContent = visible.length.toLocaleString('fa-IR');
     document.querySelector('#metric-high').textContent = visible.filter(item => item.priority === 'high').length.toLocaleString('fa-IR');
     document.querySelector('#metric-actionable').textContent = visible.filter(item => item.type !== 'monitor').length.toLocaleString('fa-IR');
@@ -464,6 +479,20 @@
     renderActions(filter.dataset.filter);
   }));
   renderActions();
+
+  const loadLiveActions = async () => {
+    // Same-origin path only exists when the FastAPI app serves this page at /dashboard.
+    const response = await fetch('/next-best-action', {headers: {Accept: 'application/json'}});
+    if (!response.ok) throw new Error(`status ${response.status}`);
+    const payload = await response.json();
+    if (!Array.isArray(payload) || !payload.length) throw new Error('empty payload');
+    actions = payload.map(toDashboardItem);
+    dataSource.textContent = `داده‌ی زنده از API · ${actions.length.toLocaleString('fa-IR')} مشتری`;
+    renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
+  };
+  loadLiveActions().catch(() => {
+    dataSource.textContent = 'داده‌ی نمونه‌ی محلی · API در دسترس نیست';
+  });
 </script>
 </body>
 </html>

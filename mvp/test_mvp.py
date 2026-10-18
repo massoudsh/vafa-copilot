@@ -194,6 +194,17 @@ class EndpointTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 200)
 
+    def test_dashboard_route_serves_landing_page(self):
+        response = self.client.get("/dashboard")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers["content-type"].startswith("text/html"))
+        self.assertIn("next-best-action", response.text)
+        self.assertNotIn("/dashboard", self.client.get("/openapi.json").json()["paths"])
+
+    def test_cors_is_opt_in(self):
+        preflight = {"Origin": "https://shop.example", "Access-Control-Request-Method": "GET"}
+        self.assertNotIn("access-control-allow-origin", self.client.options("/next-best-action", headers=preflight).headers)
+
 
 class CampaignTests(unittest.TestCase):
     def setUp(self):

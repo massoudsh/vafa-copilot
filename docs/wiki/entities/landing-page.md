@@ -8,7 +8,8 @@
 - انتشار روی GitHub Pages (منبع: برنچ `master`، پوشه‌ی `/docs`).
 
 ## Interaction contract
-- Dashboard data is synthetic and client-side; it intentionally does not call the API so GitHub Pages remains standalone.
+- The dashboard tries `GET /next-best-action` from the same origin and falls back to the built-in mock list when the request fails, so GitHub Pages stays standalone.
+- The data-source line reports whether live API data or local mock data is displayed.
 - Filters update visible recommendations and KPI values; selecting a row updates the detail panel and pre-fills the editable message preview.
 - Campaign approve/schedule/reject buttons only update the local status line; they never call the API or send messages.
 - `prefers-reduced-transparency` disables blur, preserving readable content on supported systems.

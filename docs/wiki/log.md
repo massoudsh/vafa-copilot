@@ -7,3 +7,5 @@
 ## [2026-10-17] update | Added analytics summaries, exact recommendation filters, and a glass-style KPI dashboard with selectable mock recommendations.
 
 ## [2026-10-17] update | Added an in-memory campaign preview/edit/approve/reject queue, guarded against suppressed customers and duplicate pending campaigns, with tests and display-only dashboard controls.
+
+## [2026-10-17] update | Added a `/dashboard` route, opt-in CORS, and dashboard loading of live recommendations with a mock-data fallback.
