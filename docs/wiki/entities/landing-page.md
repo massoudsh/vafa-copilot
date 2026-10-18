@@ -4,12 +4,13 @@
 
 ## Responsibilities
 - معرفی محصول وفا برای بازدیدکننده/سرمایه‌گذار.
-- نمایش داشبورد تعاملی نمونه با glass UI، KPIهای خلاصه، فیلتر فوریت/رسیدگی/کانال و جزئیات دلیل پیشنهاد.
+- نمایش داشبورد تعاملی نمونه با glass UI، KPIهای خلاصه، فیلتر فوریت/رسیدگی/کانال، جزئیات دلیل پیشنهاد و پنل نمایشی تأیید/زمان‌بندی/رد کمپین.
 - انتشار روی GitHub Pages (منبع: برنچ `master`، پوشه‌ی `/docs`).
 
 ## Interaction contract
 - Dashboard data is synthetic and client-side; it intentionally does not call the API so GitHub Pages remains standalone.
-- Filters update visible recommendations and KPI values; selecting a row updates the detail panel.
+- Filters update visible recommendations and KPI values; selecting a row updates the detail panel and pre-fills the editable message preview.
+- Campaign approve/schedule/reject buttons only update the local status line; they never call the API or send messages.
 - `prefers-reduced-transparency` disables blur, preserving readable content on supported systems.
 
 ## دسترسی

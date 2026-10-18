@@ -6,6 +6,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from mvp.api.main import app
+from mvp.api import campaigns
 from engine.next_best_action import (
     DEMO_DATE, churn_risk_ratio, decide, latest_abandoned_cart,
     load_cart_events, load_conversations, load_customers, payment_need_score,
@@ -192,6 +193,78 @@ class EndpointTests(unittest.TestCase):
         for path in ("/docs", "/redoc"):
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 200)
+
+
+class CampaignTests(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(app)
+        self.addCleanup(self.client.close)
+        campaigns.reset()
+        self.addCleanup(campaigns.reset)
+        self.snapshot = {"as_of": "2026-07-24"}
+
+    def create(self, *customer_ids):
+        return self.client.post(
+            "/campaigns",
+            params=[("customer_ids", customer_id) for customer_id in customer_ids] + list(self.snapshot.items()),
+        )
+
+    def test_preview_uses_recommendation_and_rejects_suppressed(self):
+        response = self.client.post("/campaigns/preview", params={"customer_id": "C001", **self.snapshot})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["message_fa"], response.json()["original_message_fa"])
+        self.assertEqual(response.json()["channel"], "instagram_dm")
+        edited = self.client.post("/campaigns/preview", params={"customer_id": "C001", "message_fa": "متن سفارشی", **self.snapshot})
+        self.assertEqual(edited.json()["message_fa"], "متن سفارشی")
+        for customer_id in ("C010", "C013"):
+            with self.subTest(customer=customer_id):
+                blocked = self.client.post("/campaigns/preview", params={"customer_id": customer_id, **self.snapshot})
+                self.assertEqual(blocked.status_code, 422)
+        self.assertEqual(self.client.post("/campaigns/preview", params={"customer_id": "NOPE"}).status_code, 404)
+
+    def test_create_approve_edit_and_reject_flow(self):
+        created = self.create("C001", "C002", "C001")
+        self.assertEqual(created.status_code, 201)
+        self.assertEqual([item["campaign_id"] for item in created.json()], [1, 2])
+        self.assertTrue(all(item["status"] == "pending" for item in created.json()))
+
+        edited = self.client.patch("/campaigns/1", json={"message_fa": "سلام سارا، اقساط آماده‌ست."})
+        self.assertEqual(edited.json()["message_fa"], "سلام سارا، اقساط آماده‌ست.")
+        self.assertEqual(edited.json()["original_message_fa"], created.json()[0]["message_fa"])
+
+        approved = self.client.post("/campaigns/1/approve")
+        self.assertEqual(approved.status_code, 200)
+        self.assertEqual(approved.json()["status"], "approved")
+        self.assertIsNotNone(approved.json()["reviewed_on"])
+
+        rejected = self.client.post("/campaigns/2/reject", json={"reason": "پیام مناسب نیست"})
+        self.assertEqual(rejected.json()["status"], "rejected")
+        self.assertEqual(rejected.json()["review_reason"], "پیام مناسب نیست")
+
+        self.assertEqual(self.client.post("/campaigns/1/approve").status_code, 409)
+        self.assertEqual(self.client.patch("/campaigns/1", json={"message_fa": "x"}).status_code, 409)
+        self.assertEqual(self.client.post("/campaigns/2/reject", json={}).status_code, 422)
+        self.assertEqual(self.client.get("/campaigns/999").status_code, 404)
+
+    def test_suppressed_unknown_and_duplicate_customers_are_blocked(self):
+        self.assertEqual(self.create("C010").status_code, 422)
+        self.assertEqual(self.create("C013").status_code, 422)
+        self.assertEqual(self.create("NOPE").status_code, 404)
+        self.assertEqual(self.create("C005").status_code, 201)
+        self.assertEqual(self.create("C005").status_code, 409)
+        self.assertEqual(self.client.get("/campaigns").json()[0]["customer_id"], "C005")
+        self.assertEqual(self.client.get("/campaigns").json()[0]["status"], "pending")
+
+    def test_cancel_and_status_filter_and_summary(self):
+        self.create("C001", "C005")
+        self.assertEqual(self.client.post("/campaigns/1/cancel").json()["status"], "cancelled")
+        self.client.post("/campaigns/2/approve")
+        self.assertEqual(self.client.post("/campaigns/1/cancel").status_code, 409)
+        self.assertEqual(len(self.client.get("/campaigns", params={"status": "cancelled"}).json()), 1)
+        summary = self.client.get("/campaigns/summary").json()
+        self.assertEqual(summary["total"], 2)
+        self.assertEqual(summary["status_counts"], {"cancelled": 1, "approved": 1})
+        self.assertFalse(summary["sends_messages"])
 
 
 if __name__ == "__main__":

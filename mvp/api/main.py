@@ -1,12 +1,17 @@
-"""Read-only mock-data API; recommendations do not send messages."""
+"""Mock-data API with an in-memory campaign review queue; nothing is sent."""
 
 import sys
 from collections import Counter
 from datetime import date
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+if __package__:
+    from . import campaigns
+else:
+    import campaigns
 
 from fastapi import FastAPI, HTTPException, Query
 from engine.next_best_action import (
@@ -21,10 +26,15 @@ from engine.next_best_action import (
 
 app = FastAPI(
     title="Retail Retention Copilot — Next-Best-Action API",
-    description="Read-only synthetic-data demo, not a production messaging service. "
-    "Dates control signal evaluation only; customer aggregates remain a fixed snapshot.",
-    version="0.2.0",
+    description="Synthetic-data demo with a review-only campaign queue. Dates control signal "
+    "evaluation only; customer aggregates remain a fixed snapshot; no message is ever sent.",
+    version="0.3.0",
 )
+
+ActionType = Annotated[Optional[str], Query(description="Filter by action type")]
+Urgency = Annotated[Optional[str], Query(description="Filter by urgency: low, medium, high")]
+Channel = Annotated[Optional[str], Query(description="Filter by channel: whatsapp, instagram_dm, sms, none")]
+City = Annotated[Optional[str], Query(description="Filter by customer city")]
 
 AsOf = Annotated[date | None, Query(description="Evaluation date (YYYY-MM-DD); defaults to today. Use 2026-07-24 for the mock snapshot.")]
 
@@ -46,13 +56,16 @@ def demo():
     }
 
 
+app.include_router(campaigns.router)
+
+
 @app.get("/next-best-action", response_model=list[NextBestAction])
 def all_actions(
     as_of: AsOf = None,
-    action_type: str | None = Query(default=None, description="Filter by action type"),
-    urgency: str | None = Query(default=None, description="Filter by urgency: low, medium, high"),
-    channel: str | None = Query(default=None, description="Filter by channel"),
-    city: str | None = Query(default=None, description="Filter by customer city"),
+    action_type: ActionType = None,
+    urgency: Urgency = None,
+    channel: Channel = None,
+    city: City = None,
 ):
     customers = load_customers()
     cart_events = load_cart_events()
@@ -77,10 +90,10 @@ def filter_actions(actions, customers, action_type=None, urgency=None, channel=N
 @app.get("/analytics")
 def analytics(
     as_of: AsOf = None,
-    action_type: str | None = Query(default=None, description="Filter by action type"),
-    urgency: str | None = Query(default=None, description="Filter by urgency: low, medium, high"),
-    channel: str | None = Query(default=None, description="Filter by channel"),
-    city: str | None = Query(default=None, description="Filter by customer city"),
+    action_type: ActionType = None,
+    urgency: Urgency = None,
+    channel: Channel = None,
+    city: City = None,
 ):
     customers = load_customers()
     cart_events = load_cart_events()
