@@ -10,10 +10,11 @@ from typing import Annotated, Optional
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 if __package__:
-    from . import automation, campaigns, integrations, loyalty
+    from . import automation, campaigns, customers, integrations, loyalty
 else:
     import automation
     import campaigns
+    import customers
     import integrations
     import loyalty
 
@@ -43,7 +44,7 @@ if allow_origins:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allow_origins,
-        allow_methods=["GET", "POST", "PATCH"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Content-Type"],
     )
 
@@ -79,6 +80,7 @@ def demo():
     }
 
 
+app.include_router(customers.router)
 app.include_router(campaigns.router)
 app.include_router(loyalty.router)
 app.include_router(automation.router)

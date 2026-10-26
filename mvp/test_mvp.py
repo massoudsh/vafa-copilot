@@ -6,7 +6,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from mvp.api.main import app
-from mvp.api import automation, campaigns, integrations, loyalty
+from mvp.api import automation, campaigns, customers, integrations, loyalty
 from mvp.api.automation import next_send_time
 from engine.next_best_action import (
     DEMO_DATE, churn_risk_ratio, decide, latest_abandoned_cart,
@@ -440,6 +440,51 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(self.client.post("/integrations/branches", json={"city": "تهران"}).json()["is_branch"], True)
         self.assertEqual(self.client.post("/integrations/branches", json={"city": "شهر ناموجود"}).status_code, 404)
         self.assertEqual(self.client.delete("/integrations/branches/تهران").json()["is_branch"], False)
+
+
+
+
+class CustomerWorkspaceTests(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(app)
+        self.addCleanup(self.client.close)
+        customers.reset()
+        self.addCleanup(customers.reset)
+
+    def test_customer_360_search_tags_referral_and_feedback(self):
+        directory = self.client.get("/customers", params={"q": "سارا", "as_of": "2026-07-24"})
+        self.assertEqual(directory.status_code, 200)
+        self.assertEqual([item["customer_id"] for item in directory.json()], ["C001"])
+        self.assertEqual(self.client.get("/customers/NOPE").status_code, 404)
+
+        tagged = self.client.put("/customers/C001/tags", json={"tags": [" VIP ", "بازگشت", "VIP"]})
+        self.assertEqual(tagged.json()["tags"], ["vip", "بازگشت"])
+        self.assertEqual(self.client.get("/customers", params={"tag": "vip"}).json()[0]["customer_id"], "C001")
+
+        blocked = self.client.post("/customers/C001/referrals", json={"referred_id": "C001"})
+        self.assertEqual(blocked.status_code, 422)
+        referral = self.client.post("/customers/C001/referrals", json={"referred_id": "C002"})
+        self.assertEqual(referral.status_code, 201)
+        self.assertFalse(referral.json()["reward_issued"])
+        self.assertEqual(self.client.post("/customers/C003/referrals", json={"referred_id": "C002"}).status_code, 409)
+
+        feedback = self.client.put("/customers/C001/feedback", json={"score": 10, "comment": "عالی"})
+        self.assertEqual(feedback.status_code, 200)
+        summary = self.client.get("/customers/feedback/summary").json()
+        self.assertEqual((summary["responses"], summary["promoters"], summary["nps"]), (1, 1, 100.0))
+
+        profile = self.client.get("/customers/C001", params={"as_of": "2026-07-24"})
+        self.assertEqual(profile.status_code, 200)
+        data = profile.json()
+        self.assertEqual(data["profile"]["customer_id"], "C001")
+        self.assertEqual(data["referred_by"], None)
+        self.assertEqual(data["feedback"]["score"], 10)
+        self.assertEqual(len(data["cart_events"]), 1)
+        invalid = self.client.put("/customers/C001/feedback", json={"score": 11})
+        self.assertEqual(invalid.status_code, 422)
+
+    def test_search_is_case_and_persian_variant_tolerant(self):
+        self.assertEqual(self.client.get("/customers", params={"q": "ی"}).status_code, 200)
 
 
 if __name__ == "__main__":

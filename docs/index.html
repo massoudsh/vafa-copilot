@@ -97,10 +97,10 @@
   .panel h3{font-size:15px;color:var(--accent-dark);}
   .filter-group{display:flex;gap:8px;flex-wrap:wrap;}
   .filter{border:1px solid var(--line);background:rgba(255,255,255,.56);border-radius:999px;padding:7px 12px;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;}
-  .filter[aria-pressed="true"],.filter:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .filter[aria-current="true"],.filter:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
   .action-list{display:grid;gap:10px;}
   .action-row{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:11px;text-align:right;width:100%;border:1px solid transparent;background:rgba(246,251,249,.72);border-radius:16px;padding:12px;cursor:pointer;color:var(--ink);font:inherit;}
-  .action-row:hover,.action-row[aria-selected="true"]{border-color:rgba(11,128,101,.28);background:#fff;}
+  .action-row:hover,.action-row[aria-current="true"]{border-color:rgba(11,128,101,.28);background:#fff;}
   .priority{width:8px;height:34px;border-radius:8px;background:#9db8ae;}
   .priority.high{background:#e07a64;}.priority.medium{background:#d4a447;}
   .action-row strong{display:block;font-size:13px;}.action-row small{display:block;color:var(--muted);font-size:11px;}
@@ -120,7 +120,7 @@
   .campaign-count{font-size:12px;color:var(--muted);}
   .seg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
   .seg-card{border:1px solid rgba(255,255,255,.82);background:rgba(255,255,255,.64);border-radius:16px;padding:12px;text-align:right;cursor:pointer;font:inherit;color:var(--ink);transition:border-color .15s ease,background .15s ease;}
-  .seg-card:hover,.seg-card[aria-pressed="true"]{border-color:rgba(11,128,101,.35);background:#fff;}
+  .seg-card:hover,.seg-card[aria-current="true"]{border-color:rgba(11,128,101,.35);background:#fff;}
   .seg-card strong{display:block;color:var(--accent-dark);font-size:20px;}
   .seg-card span{font-size:11px;color:var(--muted);}
   .loyalty-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
@@ -162,6 +162,15 @@
   @media (max-width:860px){.seg-grid{grid-template-columns:repeat(2,1fr);}.loyalty-strip{grid-template-columns:1fr;}}
   @media (max-width:560px){.metric-grid{grid-template-columns:repeat(2,1fr);}}
 
+  button:disabled{opacity:.55;cursor:not-allowed;}
+  .customer-form{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-block:12px;}
+  .customer-form label{display:grid;gap:4px;flex:1;min-width:160px;}
+  .customer-form input,.customer-form select{padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink);}
+  .customer-form button{min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:10px;font:inherit;cursor:pointer;}
+  .navlinks ul{display:flex;gap:20px;list-style:none;flex-wrap:wrap;}
+  .navlinks a{color:var(--accent-dark);}
+  @media(max-width:860px){.navlinks ul{display:none;}}
+</style>
 </head>
 <body>
 
@@ -174,6 +183,7 @@
         <li><a href="#how">نحوه‌ی کار</a></li>
         <li><a href="#features">امکانات</a></li>
         <li><a href="#workspace">داشبورد نمونه</a></li>
+        <li><a href="#customers">میز مشتریان</a></li>
         <li><a href="#demo">نمونه‌ی تصمیم</a></li>
       </ul>
       <a class="cta" href="#waitlist">ثبت‌نام لیست انتظار</a>
@@ -338,10 +348,10 @@
           <div class="panel-head">
             <h3>اقدام‌های اولویت‌دار</h3>
             <div class="filter-group" aria-label="فیلتر اقدام">
-              <button class="filter" type="button" data-filter="all" aria-pressed="true">همه</button>
-              <button class="filter" type="button" data-filter="high" aria-pressed="false">فوری</button>
-              <button class="filter" type="button" data-filter="care" aria-pressed="false">رسیدگی</button>
-              <button class="filter" type="button" data-filter="instagram" aria-pressed="false">اینستاگرام</button>
+              <button class="filter" type="button" data-filter="all" aria-current="true">همه</button>
+              <button class="filter" type="button" data-filter="high" aria-current="false">فوری</button>
+              <button class="filter" type="button" data-filter="care" aria-current="false">رسیدگی</button>
+              <button class="filter" type="button" data-filter="instagram_dm" aria-current="false">اینستاگرام</button>
             </div>
           </div>
           <div class="action-list" id="action-list" aria-live="polite"></div>
@@ -385,6 +395,37 @@
         <p class="preview-note" id="loyalty-status" role="status">این بخش در نسخهٔ محلی نمایشی است؛ وقتی صفحه از API سرو شود، بخش‌ها، امتیاز و برنامهٔ مسیر از سرویس خوانده می‌شوند.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="customers" aria-labelledby="customers-title">
+  <div class="wrap panel">
+    <h2 id="customers-title">میز مشتریان</h2>
+    <p>جست‌وجوی فارسی، پرونده یکپارچه، برچسب، معرفی دوستان و بازخورد؛ داده‌ها ساختگی و تغییرات موقت هستند.</p>
+    <form id="customer-search" class="customer-form">
+      <label>نام، شناسه یا شهر<input name="q" maxlength="100" autocomplete="off"></label>
+      <label>فیلتر برچسب<input name="tag" maxlength="40"></label>
+      <button type="submit">جست‌وجو</button>
+    </form>
+    <label for="customer-select">انتخاب مشتری</label>
+    <select id="customer-select" aria-describedby="customer-summary"></select>
+    <p id="customer-summary" role="status">برای استفاده از این بخش، صفحه را از مسیر /dashboard سرویس باز کنید.</p>
+    <details><summary>خریدها، تعاملات و رضایت کانال‌ها</summary><pre id="customer-history" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
+    <form id="customer-tags" class="customer-form">
+      <label>برچسب‌ها با ویرگول جدا شوند<input name="tags" maxlength="400" placeholder="علاقه‌مند، حضوری"></label>
+      <button type="submit" disabled>ذخیره برچسب</button>
+    </form>
+    <form id="customer-referral" class="customer-form">
+      <label>شناسه مشتری دعوت‌شده<input name="referred_id" maxlength="40" required dir="ltr"></label>
+      <button type="submit" disabled>ثبت معرفی بدون پاداش</button>
+    </form>
+    <form id="customer-feedback" class="customer-form">
+      <label>امتیاز توصیه به دوستان (۰ تا ۱۰)<input name="score" type="number" min="0" max="10" step="1" required></label>
+      <label>توضیح بازخورد<input name="comment" maxlength="500"></label>
+      <button type="submit" disabled>ذخیره بازخورد</button>
+    </form>
+    <p id="customer-operation" role="status"></p>
+    <p id="feedback-summary" role="status"></p>
   </div>
 </section>
 
@@ -449,9 +490,9 @@
     message: action.message_fa
   });
   const mockActions = [
-    {id:'C001', name:'سارا احمدی', action:'پیشنهاد اقساط', type:'bnpl', priority:'high', channel:'اینستاگرام', channelType:'instagram', segment:'champion', points:2340, reason:'سبد رهاشده و سابقه‌ی پرسش از پرداخت قسطی.', message:'سلام سارا عزیز، می‌تونید «کیف چرم مدل آوا» رو الان بردارید و پرداختش رو در چند قسط انجام بدید.'},
+    {id:'C001', name:'سارا احمدی', action:'پیشنهاد اقساط', type:'bnpl', priority:'high', channel:'اینستاگرام', channelType:'instagram_dm', segment:'champion', points:2340, reason:'سبد رهاشده و سابقه‌ی پرسش از پرداخت قسطی.', message:'سلام سارا عزیز، می‌تونید «کیف چرم مدل آوا» رو الان بردارید و پرداختش رو در چند قسط انجام بدید.'},
     {id:'C008', name:'رضا کاظمی', action:'پیگیری رضایت', type:'care', priority:'high', channel:'واتساپ', channelType:'whatsapp', segment:'at_risk', points:380, reason:'شکایت اخیر نیاز به رسیدگی انسانی دارد.', message:'سلام رضا عزیز 🌿 می‌خواستیم مطمئن بشیم تجربه‌ی خریدتون خوب بوده. اگه مشکلی هست همین‌جا بگید تا سریع رسیدگی کنیم.'},
-    {id:'C005', name:'زهرا محمدی', action:'ارسال رایگان', type:'free_shipping', priority:'medium', channel:'اینستاگرام', channelType:'instagram', segment:'new', points:98, reason:'پرسش اخیر درباره‌ی هزینه‌ی ارسال.', message:'سلام زهرا عزیز، «عینک آفتابی کلاسیک» توی سبدتونه — امروز ارسالش رایگانه، از دست ندید.'},
+    {id:'C005', name:'زهرا محمدی', action:'ارسال رایگان', type:'free_shipping', priority:'medium', channel:'اینستاگرام', channelType:'instagram_dm', segment:'new', points:98, reason:'پرسش اخیر درباره‌ی هزینه‌ی ارسال.', message:'سلام زهرا عزیز، «عینک آفتابی کلاسیک» توی سبدتونه — امروز ارسالش رایگانه، از دست ندید.'},
     {id:'C012', name:'کیانوش رستمی', action:'یادآوری ملایم', type:'reminder', priority:'low', channel:'واتساپ', channelType:'whatsapp', segment:'champion', points:2740, reason:'کمی از چرخه‌ی معمول خرید فاصله گرفته است.', message:'سلام کیانوش جان، کالکشن جدیدتون هنوز منتظرتونه. هر وقت راحت بودید سر بزنید.'}
   ];
   const segmentLabels = {champion:'وفادار ارزشمند', loyal:'وفادار', new:'تازه‌وارد', at_risk:'در خطر ریزش', dormant:'غیرفعال'};
@@ -465,12 +506,12 @@
       const card = document.createElement('button');
       card.type = 'button';
       card.className = 'seg-card';
-      card.setAttribute('aria-pressed', activeSegment === key ? 'true' : 'false');
+      card.setAttribute('aria-current', activeSegment === key ? 'true' : 'false');
       card.innerHTML = `<strong>${(counts[key] || 0).toLocaleString('fa-IR')}</strong><span>${label}</span>`;
       card.addEventListener('click', () => {
         activeSegment = activeSegment === key ? null : key;
         renderSegments(counts);
-        renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
+        renderActions(document.querySelector('.filter[aria-current="true"]').dataset.filter);
       });
       segmentGrid.append(card);
     });
@@ -487,8 +528,8 @@
       && (!activeSegment || item.segment === activeSegment));
     document.querySelector('#metric-total').textContent = visible.length.toLocaleString('fa-IR');
     document.querySelector('#metric-high').textContent = visible.filter(item => item.priority === 'high').length.toLocaleString('fa-IR');
-    document.querySelector('#metric-actionable').textContent = visible.filter(item => item.type !== 'monitor').length.toLocaleString('fa-IR');
-    document.querySelector('#metric-channels').textContent = new Set(visible.map(item => item.channelType)).size.toLocaleString('fa-IR');
+    document.querySelector('#metric-actionable').textContent = visible.filter(item => item.type !== 'monitor' && item.type !== 'suppress').length.toLocaleString('fa-IR');
+    document.querySelector('#metric-channels').textContent = new Set(visible.map(item => item.channelType).filter(channel => channel !== 'none')).size.toLocaleString('fa-IR');
     actionList.replaceChildren();
     if (!visible.length) {
       const empty = document.createElement('p');
@@ -501,11 +542,15 @@
       const row = document.createElement('button');
       row.type = 'button';
       row.className = 'action-row';
-      row.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
-      row.innerHTML = `<span class="priority ${item.priority}" aria-hidden="true"></span><span><strong>${item.name}</strong><small>${item.id} · ${item.channel}</small></span><span class="action-badge">${item.action}</span>`;
+      row.setAttribute('aria-current', index === 0 ? 'true' : 'false');
+      row.innerHTML = '<span class="priority" aria-hidden="true"></span><span><strong></strong><small></small></span><span class="action-badge"></span>';
+      row.querySelector('.priority').classList.add(['high','medium','low'].includes(item.priority) ? item.priority : 'low');
+      row.querySelector('strong').textContent = item.name;
+      row.querySelector('small').textContent = `${item.id} · ${item.channel}`;
+      row.querySelector('.action-badge').textContent = item.action;
       row.addEventListener('click', () => {
-        document.querySelectorAll('.action-row').forEach(button => button.setAttribute('aria-selected', 'false'));
-        row.setAttribute('aria-selected', 'true');
+        document.querySelectorAll('.action-row').forEach(button => button.setAttribute('aria-current', 'false'));
+        row.setAttribute('aria-current', 'true');
         showDetail(item);
       });
       actionList.append(row);
@@ -577,8 +622,8 @@
       : `کمپین ${selectedAction.name} برای بازبینی زمان‌بندی در صف قرار گرفت (نمایشی).`;
   }));
   filters.forEach(filter => filter.addEventListener('click', () => {
-    filters.forEach(button => button.setAttribute('aria-pressed', 'false'));
-    filter.setAttribute('aria-pressed', 'true');
+    filters.forEach(button => button.setAttribute('aria-current', 'false'));
+    filter.setAttribute('aria-current', 'true');
     renderActions(filter.dataset.filter);
   }));
   renderSegments(mockSegmentCounts());
@@ -592,7 +637,7 @@
     if (!Array.isArray(payload) || !payload.length) throw new Error('empty payload');
     actions = payload.map(toDashboardItem);
     dataSource.textContent = `داده‌ی زنده از API · ${actions.length.toLocaleString('fa-IR')} مشتری`;
-    renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
+    renderActions(document.querySelector('.filter[aria-current="true"]').dataset.filter);
   };
   const loadLiveLoyalty = async () => {
     const [segments, journeys] = await Promise.all([
@@ -608,10 +653,82 @@
       fetch(`/loyalty/points?customer_id=${encodeURIComponent(item.id)}`).then(response => response.ok ? response.json() : null)));
     actions.slice(0, 25).forEach((item, index) => { pointsByCustomer[item.id] = points[index]?.points_balance; });
     if (journeys && journeys.length) loyaltyStatus.textContent = `باشگاه مشتریان و ${journeys.length.toLocaleString('fa-IR')} مسیر خودکار از سرویس خوانده شد؛ منطق ساعت مجاز ۲۱ تا ۹ و سقف ۲ پیام در هفته فعال است.`;
-    renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
+    renderActions(document.querySelector('.filter[aria-current="true"]').dataset.filter);
   };
-  Promise.all([loadLiveActions(), loadLiveLoyalty().catch(() => null)]).catch(() => {
-    dataSource.textContent = 'داده‌ی نمونه‌ی محلی · API در دسترس نیست';
+  const customerSelect = document.querySelector('#customer-select');
+  const customerSummary = document.querySelector('#customer-summary');
+  const customerHistory = document.querySelector('#customer-history');
+  const customerOperation = document.querySelector('#customer-operation');
+  const feedbackSummary = document.querySelector('#feedback-summary');
+  const customerForms = document.querySelectorAll('#customer-tags, #customer-referral, #customer-feedback');
+  let customerDirectory = [];
+  let selectedCustomerId = null;
+  const showCustomer = async id => {
+    if (!id) return;
+    selectedCustomerId = id;
+    const response = await fetch(`/customers/${encodeURIComponent(id)}?as_of=2026-07-24`).catch(() => null);
+    const data = response && response.ok ? await response.json() : null;
+    if (!data) {
+      customerSummary.textContent = 'برای دیدن پرونده، داشبورد را از همان API باز کنید.';
+      return;
+    }
+    const p = data.profile;
+    customerSummary.textContent = `${p.name} · ${p.segment_fa} · ${data.points.toLocaleString('fa-IR')} امتیاز · ${data.consent.do_not_disturb ? 'عدم مزاحمت فعال' : 'کانال‌های مجاز بررسی شد'}`;
+    customerHistory.textContent = JSON.stringify({cart_events: data.cart_events, conversations: data.conversations, recommendation: data.recommendation, feedback: data.feedback}, null, 2);
+    customerForms.forEach(form => form.querySelector('button').disabled = false);
+  };
+  const renderCustomerDirectory = () => {
+    customerSelect.replaceChildren();
+    customerDirectory.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.customer_id;
+      option.textContent = `${item.name} · ${item.customer_id} · ${item.city}`;
+      customerSelect.append(option);
+    });
+    showCustomer(customerDirectory[0]?.customer_id);
+  };
+  document.querySelector('#customer-search').addEventListener('submit', async event => {
+    event.preventDefault();
+    const params = new URLSearchParams(new FormData(event.currentTarget));
+    const response = await fetch(`/customers?${params}`).catch(() => null);
+    customerDirectory = response && response.ok ? await response.json() : [];
+    renderCustomerDirectory();
+    customerSummary.textContent = customerDirectory.length ? `${customerDirectory.length.toLocaleString('fa-IR')} مشتری پیدا شد.` : 'مشتری‌ای پیدا نشد.';
+  });
+  customerSelect.addEventListener('change', event => showCustomer(event.target.value));
+  document.querySelector('#customer-tags').addEventListener('submit', async event => {
+    event.preventDefault();
+    const tags = event.currentTarget.tags.value.split(',').map(tag => tag.trim()).filter(Boolean);
+    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/tags`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({tags})});
+    customerOperation.textContent = response.ok ? 'برچسب‌ها ذخیره شدند.' : 'ذخیره برچسب انجام نشد.';
+  });
+  document.querySelector('#customer-referral').addEventListener('submit', async event => {
+    event.preventDefault();
+    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/referrals`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({referred_id: event.currentTarget.referred_id.value})});
+    customerOperation.textContent = response.ok ? 'معرفی ثبت شد؛ پاداش تا تأیید سفارش صادر نمی‌شود.' : 'ثبت معرفی انجام نشد.';
+  });
+  document.querySelector('#customer-feedback').addEventListener('submit', async event => {
+    event.preventDefault();
+    const body = {score: Number(event.currentTarget.score.value), comment: event.currentTarget.comment.value};
+    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/feedback`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+    customerOperation.textContent = response.ok ? 'بازخورد ثبت شد.' : 'ثبت بازخورد انجام نشد.';
+    loadFeedbackSummary();
+  });
+  const loadFeedbackSummary = async () => {
+    const response = await fetch('/customers/feedback/summary').catch(() => null);
+    const data = response && response.ok ? await response.json() : null;
+    if (data) feedbackSummary.textContent = `NPS: ${data.nps ?? '—'} · پاسخ‌ها: ${data.responses.toLocaleString('fa-IR')} · مروجان: ${data.promoters.toLocaleString('fa-IR')}`;
+  };
+  const loadCustomers = async () => {
+    const response = await fetch('/customers').catch(() => null);
+    if (!response || !response.ok) return;
+    customerDirectory = await response.json();
+    renderCustomerDirectory();
+    loadFeedbackSummary();
+  };
+  loadCustomers();
+  Promise.resolve().then(loadLiveActions).then(loadLiveLoyalty).catch(() => {
+    dataSource.textContent = 'اتصال کامل به API برقرار نیست؛ داده‌ها ممکن است نمونه یا ناقص باشند.';
   });
 </script>
 </body>
