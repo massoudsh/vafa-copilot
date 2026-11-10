@@ -38,6 +38,11 @@
 - Loyalty, automation, and integration state is in memory; each module exposes a `reset()` used by tests.
 - Tests use in-process HTTP through TestClient; no browser or persistent server is needed.
 
+## Container runtime
+- `Dockerfile:1` packages Python 3.12, API/engine code, synthetic CSV fixtures, and `landing/index.html`; runs UID/GID 10001 with one worker and a `GET /` health check.
+- `compose.yaml:1` binds loopback port 8000, drops capabilities, uses a read-only root filesystem and temporary `/tmp`; all application state remains process-local and is lost on restart.
+- `.dockerignore:1` allowlists runtime inputs only. Image build/run requires a Docker host; no connected build server was available during packaging.
+
 ## Dependencies
 - [[entities/next-best-action-engine]] — decisions and batch execution.
 - [[entities/data-model]] — synthetic CSV snapshots.

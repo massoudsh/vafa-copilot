@@ -1,0 +1,13 @@
+**
+!mvp/
+!mvp/requirements.txt
+!mvp/api/
+!mvp/api/*.py
+!mvp/engine/
+!mvp/engine/*.py
+!mvp/data/
+!mvp/data/*.csv
+!landing/
+!landing/index.html
+!Dockerfile
+!compose.yaml

@@ -26,6 +26,34 @@ python3 -m venv .venv
 .venv/bin/uvicorn mvp.api.main:app --port 8000
 ```
 
+## Docker (synthetic demo only)
+
+On your Docker host, run from the repository root:
+
+```bash
+docker compose up --build -d
+docker compose ps
+docker compose logs --tail=100 vafa
+docker compose down
+```
+
+The dashboard is at `/dashboard`, API docs at `/docs`, and the health check uses
+`GET /`. Compose binds port 8000 to the host loopback interface only. For remote
+access, use an authenticated reverse proxy; do not expose this unauthenticated
+synthetic demo or load real customer data.
+
+The image runs as a non-root user with one Uvicorn worker. All mutable application
+state is in memory: restarting/recreating the container loses campaigns, points
+adjustments, coupons, referrals, feedback, tokens, and journeys. Multiple workers
+or replicas would each have independent state. No database or message delivery
+service is included. Compose uses a read-only filesystem and a temporary `/tmp`.
+`VAFA_CORS_ORIGINS` optionally allows specific frontend origins; it is not authentication.
+
+Only runtime Python files, synthetic CSV fixtures, and the dashboard are copied
+into the image; local dependencies, Git metadata, project configuration and secrets
+are excluded by the build-context allowlist. Docker image build/run must be verified
+on a Docker host; application tests alone do not validate the image.
+
 ## API و داده‌ی آزمایشی
 
 این پروژه یک دموی **فقط‌خواندنی** است، نه سرویس آماده‌ی تولید؛ همه‌ی ۱۷ مشتری و مکالمه‌ها ساختگی‌اند و هیچ پیامی ارسال نمی‌شود. تاریخ مرجع داده‌ها `2026-07-24` است. بدون `as_of` موتور از تاریخ روز استفاده می‌کند؛ برای بازتولید دمو از تاریخ مرجع استفاده کنید. تغییر تاریخ فقط زمان ارزیابی سیگنال‌ها را عوض می‌کند، نه snapshot فیلدهای تجمیعی مشتری؛ این قابلیت بک‌تست تاریخی نیست.
