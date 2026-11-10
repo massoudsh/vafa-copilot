@@ -54,6 +54,8 @@ into the image; local dependencies, Git metadata, project configuration and secr
 are excluded by the build-context allowlist. Docker image build/run must be verified
 on a Docker host; application tests alone do not validate the image.
 
+Docker Compose uses host networking only while building so pip can use the host DNS resolver; the application container remains loopback-bound and isolated at runtime. If the Docker installation rejects `build.network`, use `docker compose build --network=host` or configure Docker Desktop DNS.
+
 ## API و داده‌ی آزمایشی
 
 این پروژه یک دموی **فقط‌خواندنی** است، نه سرویس آماده‌ی تولید؛ همه‌ی ۱۷ مشتری و مکالمه‌ها ساختگی‌اند و هیچ پیامی ارسال نمی‌شود. تاریخ مرجع داده‌ها `2026-07-24` است. بدون `as_of` موتور از تاریخ روز استفاده می‌کند؛ برای بازتولید دمو از تاریخ مرجع استفاده کنید. تغییر تاریخ فقط زمان ارزیابی سیگنال‌ها را عوض می‌کند، نه snapshot فیلدهای تجمیعی مشتری؛ این قابلیت بک‌تست تاریخی نیست.
