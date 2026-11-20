@@ -97,7 +97,7 @@
   .panel h3{font-size:15px;color:var(--accent-dark);}
   .filter-group{display:flex;gap:8px;flex-wrap:wrap;}
   .filter{border:1px solid var(--line);background:rgba(255,255,255,.56);border-radius:999px;padding:7px 12px;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;}
-  .filter[aria-current="true"],.filter:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .filter[aria-pressed="true"],.filter:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
   .action-list{display:grid;gap:10px;}
   .action-row{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:11px;text-align:right;width:100%;border:1px solid transparent;background:rgba(246,251,249,.72);border-radius:16px;padding:12px;cursor:pointer;color:var(--ink);font:inherit;}
   .action-row:hover,.action-row[aria-current="true"]{border-color:rgba(11,128,101,.28);background:#fff;}
@@ -120,7 +120,7 @@
   .campaign-count{font-size:12px;color:var(--muted);}
   .seg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
   .seg-card{border:1px solid rgba(255,255,255,.82);background:rgba(255,255,255,.64);border-radius:16px;padding:12px;text-align:right;cursor:pointer;font:inherit;color:var(--ink);transition:border-color .15s ease,background .15s ease;}
-  .seg-card:hover,.seg-card[aria-current="true"]{border-color:rgba(11,128,101,.35);background:#fff;}
+  .seg-card:hover,.seg-card[aria-pressed="true"]{border-color:rgba(11,128,101,.35);background:#fff;}
   .seg-card strong{display:block;color:var(--accent-dark);font-size:20px;}
   .seg-card span{font-size:11px;color:var(--muted);}
   .loyalty-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
@@ -167,9 +167,9 @@
   .customer-form label{display:grid;gap:4px;flex:1;min-width:160px;}
   .customer-form input,.customer-form select{padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink);}
   .customer-form button{min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:10px;font:inherit;cursor:pointer;}
-  .navlinks ul{display:flex;gap:20px;list-style:none;flex-wrap:wrap;}
+  .navlinks ul{display:flex;gap:20px;list-style:none;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%;}
   .navlinks a{color:var(--accent-dark);}
-  @media(max-width:860px){.navlinks ul{display:none;}}
+  .navlinks ul::-webkit-scrollbar{display:none;}
 </style>
 </head>
 <body>
@@ -348,10 +348,10 @@
           <div class="panel-head">
             <h3>اقدام‌های اولویت‌دار</h3>
             <div class="filter-group" aria-label="فیلتر اقدام">
-              <button class="filter" type="button" data-filter="all" aria-current="true">همه</button>
-              <button class="filter" type="button" data-filter="high" aria-current="false">فوری</button>
-              <button class="filter" type="button" data-filter="care" aria-current="false">رسیدگی</button>
-              <button class="filter" type="button" data-filter="instagram_dm" aria-current="false">اینستاگرام</button>
+              <button class="filter" type="button" data-filter="all" aria-pressed="true">همه</button>
+              <button class="filter" type="button" data-filter="high" aria-pressed="false">فوری</button>
+              <button class="filter" type="button" data-filter="care" aria-pressed="false">رسیدگی</button>
+              <button class="filter" type="button" data-filter="instagram_dm" aria-pressed="false">اینستاگرام</button>
             </div>
           </div>
           <div class="action-list" id="action-list" aria-live="polite"></div>
@@ -476,6 +476,11 @@
 </footer>
 
 <script>
+  const query = new URLSearchParams(location.search);
+  const requestedDate = query.get('as_of') || '';
+  const evalDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) ? requestedDate : new Date().toISOString().slice(0, 10);
+  const withDate = path => `${path}${path.includes('?') ? '&' : '?'}as_of=${encodeURIComponent(evalDate)}`;
+  let liveMode = false;
   const actionLabels = {care:'رسیدگی', reminder:'یادآوری', free_shipping:'ارسال رایگان', cashback:'کش‌بک', bnpl:'پیشنهاد اقساط', discount_timeboxed:'تخفیف کوتاه‌مدت', loyalty_no_discount:'دسترسی زودهنگام', monitor:'پایش', suppress:'عدم ارسال'};
   const channelLabels = {instagram_dm:'اینستاگرام', whatsapp:'واتساپ', sms:'پیامک', none:'بدون کانال'};
   const toDashboardItem = action => ({
@@ -506,12 +511,12 @@
       const card = document.createElement('button');
       card.type = 'button';
       card.className = 'seg-card';
-      card.setAttribute('aria-current', activeSegment === key ? 'true' : 'false');
+      card.setAttribute('aria-pressed', activeSegment === key ? 'true' : 'false');
       card.innerHTML = `<strong>${(counts[key] || 0).toLocaleString('fa-IR')}</strong><span>${label}</span>`;
       card.addEventListener('click', () => {
         activeSegment = activeSegment === key ? null : key;
         renderSegments(counts);
-        renderActions(document.querySelector('.filter[aria-current="true"]').dataset.filter);
+        renderActions(document.querySelector('.filter[aria-pressed="true"]').dataset.filter);
       });
       segmentGrid.append(card);
     });
@@ -538,11 +543,12 @@
       actionList.append(empty);
       return;
     }
-    visible.forEach((item, index) => {
+    const keep = visible.find(item => selectedAction && item.id === selectedAction.id) || visible[0];
+    visible.forEach(item => {
       const row = document.createElement('button');
       row.type = 'button';
       row.className = 'action-row';
-      row.setAttribute('aria-current', index === 0 ? 'true' : 'false');
+      row.setAttribute('aria-current', item.id === keep.id ? 'true' : 'false');
       row.innerHTML = '<span class="priority" aria-hidden="true"></span><span><strong></strong><small></small></span><span class="action-badge"></span>';
       row.querySelector('.priority').classList.add(['high','medium','low'].includes(item.priority) ? item.priority : 'low');
       row.querySelector('strong').textContent = item.name;
@@ -554,8 +560,9 @@
         showDetail(item);
       });
       actionList.append(row);
-      if (index === 0) showDetail(item);
     });
+    // Re-rendering after a filter must not wipe the user's edited message.
+    if (!selectedAction || selectedAction.id !== keep.id) showDetail(keep);
   };
   let selectedAction = null;
   const messageBox = document.querySelector('#campaign-message');
@@ -589,12 +596,40 @@
         : 'حالت نمایشی: کوپن VAFA-0001 به مبلغ ۱۰۰٬۰۰۰ تومان صادر می‌شود (بدون اتصال به سرویس).';
       return;
     }
-    const response = await fetch(`/automation/1/schedule?as_of=${new Date().toISOString().slice(0, 10)}`, {
+    const journeys = await fetch('/automation').then(r => r.ok ? r.json() : []).catch(() => []);
+    let journeyId = journeys[0]?.journey_id;
+    if (!journeyId) {
+      const created = await fetch('/automation', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name: 'پیگیری سبد رهاشده',
+          trigger: 'cart_abandoned',
+          steps: [
+            {name: 'یادآوری اول', delay_days: 0, condition: 'always', message_fa: 'سبد خریدتون هنوز منتظرتونه.'},
+            {name: 'پیگیری دوم', delay_days: 2, condition: 'always', message_fa: 'اگر سوالی دارید همین‌جا بپرسید.'},
+            {name: 'پیشنهاد ویژه', delay_days: 5, condition: 'high_urgency', message_fa: 'یک پیشنهاد ویژه برای تکمیل سبدتون داریم.'},
+          ],
+        }),
+      }).catch(() => null);
+      journeyId = created && created.ok ? (await created.json()).journey_id : null;
+    }
+    if (!journeyId) {
+      document.querySelector('#journey-status').textContent = 'نمایشی';
+      loyaltyStatus.textContent = `حالت نمایشی: برای ${selectedAction.name} یک یادآوری امروز ساعت ۱۰ و یک پیگیری فردا برنامه‌ریزی می‌شود؛ مرحلهٔ سوم به‌دلیل سقف ۲ پیام در هفته اجرا نمی‌شود.`;
+      return;
+    }
+    const response = await fetch(withDate(`/automation/${journeyId}/schedule`), {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({customer_id: customerId})
     }).catch(() => null);
     const body = response && response.ok ? await response.json() : null;
+    if (response && response.status === 422) {
+      document.querySelector('#journey-status').textContent = 'شرط برقرار نیست';
+      loyaltyStatus.textContent = `برای ${selectedAction.name} این مسیر خودکار فعال نمی‌شود؛ سیگنال سبد یا ریسک ریزش برقرار نیست.`;
+      return;
+    }
     if (body) {
       const planned = body.steps.filter(step => step.status === 'planned').length;
       const blocked = body.steps.length - planned;
@@ -605,55 +640,105 @@
     document.querySelector('#journey-status').textContent = 'نمایشی';
     loyaltyStatus.textContent = `حالت نمایشی: برای ${selectedAction.name} یک یادآوری امروز ساعت ۱۰ و یک پیگیری فردا برنامه‌ریزی می‌شود؛ مرحلهٔ سوم به‌دلیل سقف ۲ پیام در هفته اجرا نمی‌شود.`;
   }));
-  document.querySelectorAll('[data-campaign]').forEach(button => button.addEventListener('click', () => {
-    if (!selectedAction) return;
-    const text = messageBox.value.trim();
-    if (button.dataset.campaign === 'reject') {
-      campaignStatus.textContent = `پیشنهاد ${selectedAction.name} رد شد و در گزارش ثبت می‌شود.`;
-      return;
+  const campaignCache = {};
+  const statusLabel = status => ({approved: 'تأیید', rejected: 'رد', cancelled: 'لغو'})[status] || status;
+  const ensureCampaign = async customerId => {
+    if (campaignCache[customerId]) return campaignCache[customerId];
+    const created = await fetch(withDate(`/campaigns?customer_ids=${encodeURIComponent(customerId)}`), {method: 'POST'}).catch(() => null);
+    let campaign = null;
+    if (created && created.ok) campaign = (await created.json())[0];
+    if (created && created.status === 409) {
+      // A pending review already exists for this customer; reuse it instead of duplicating.
+      const pending = await fetch('/campaigns?status=pending').then(r => r.ok ? r.json() : []).catch(() => []);
+      campaign = pending.find(item => item.customer_id === customerId) || null;
     }
-    if (!text) {
+    if (campaign) campaignCache[customerId] = campaign;
+    return campaign;
+  };
+  document.querySelectorAll('[data-campaign]').forEach(button => button.addEventListener('click', async () => {
+    if (!selectedAction) return;
+    const mode = button.dataset.campaign;
+    const text = messageBox.value.trim();
+    if (mode !== 'reject' && !text) {
       campaignStatus.textContent = 'متن پیام نمی‌تواند خالی باشد.';
       messageBox.focus();
       return;
     }
-    campaignStatus.textContent = button.dataset.campaign === 'approve'
-      ? `کمپین ${selectedAction.name} تأیید شد (نمایشی؛ پیامی ارسال نمی‌شود).`
-      : `کمپین ${selectedAction.name} برای بازبینی زمان‌بندی در صف قرار گرفت (نمایشی).`;
+    if (!liveMode) {
+      campaignStatus.textContent = mode === 'reject'
+        ? `پیشنهاد ${selectedAction.name} رد شد (نمایشی؛ سرویس در دسترس نیست).`
+        : mode === 'approve'
+          ? `کمپین ${selectedAction.name} تأیید شد (نمایشی؛ سرویس در دسترس نیست).`
+          : `کمپین ${selectedAction.name} در صف بازبینی قرار گرفت (نمایشی؛ سرویس در دسترس نیست).`;
+      return;
+    }
+    campaignStatus.textContent = 'در حال ثبت کمپین…';
+    const campaign = await ensureCampaign(selectedAction.id);
+    if (!campaign) {
+      campaignStatus.textContent = 'ثبت کمپین ممکن نشد: این مشتری در لیست عدم ارسال است یا سرویس پاسخ نداد.';
+      return;
+    }
+    if (campaign.status !== 'pending') {
+      campaignStatus.textContent = `این کمپین قبلاً ${statusLabel(campaign.status)} شده است؛ برای بررسی دوباره صفحه را بازخوانی کنید.`;
+      return;
+    }
+    if (text !== campaign.message_fa) {
+      const edited = await fetch(`/campaigns/${campaign.campaign_id}`, {
+        method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message_fa: text})
+      }).catch(() => null);
+      if (!edited || !edited.ok) {
+        campaignStatus.textContent = 'ذخیره‌ی متن ویرایش‌شده انجام نشد.';
+        return;
+      }
+    }
+    if (mode === 'schedule') {
+      campaignStatus.textContent = `کمپین ${selectedAction.name} در صف بازبینی ثبت شد (شناسه ${campaign.campaign_id})؛ ارسالی انجام نمی‌شود.`;
+      return;
+    }
+    const reviewed = await fetch(`/campaigns/${campaign.campaign_id}/${mode === 'approve' ? 'approve' : 'reject'}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: mode === 'reject' ? JSON.stringify({reason: 'رد شده از داشبورد'}) : undefined,
+    }).catch(() => null);
+    if (reviewed && reviewed.ok) campaignCache[selectedAction.id] = await reviewed.json();
+    campaignStatus.textContent = reviewed && reviewed.ok
+      ? (mode === 'approve'
+          ? `کمپین ${selectedAction.name} تأیید شد (شناسه ${campaign.campaign_id})؛ ارسالی انجام نمی‌شود.`
+          : `پیشنهاد ${selectedAction.name} رد و دلیل ثبت شد.`)
+      : 'ثبت نتیجه‌ی بررسی انجام نشد.';
   }));
   filters.forEach(filter => filter.addEventListener('click', () => {
-    filters.forEach(button => button.setAttribute('aria-current', 'false'));
-    filter.setAttribute('aria-current', 'true');
+    filters.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    filter.setAttribute('aria-pressed', 'true');
     renderActions(filter.dataset.filter);
   }));
   renderSegments(mockSegmentCounts());
   renderActions();
 
+  const currentFilter = () => document.querySelector('.filter[aria-pressed="true"]').dataset.filter;
   const loadLiveActions = async () => {
     // Same-origin paths only exist when the FastAPI app serves this page at /dashboard.
-    const response = await fetch('/next-best-action', {headers: {Accept: 'application/json'}});
+    const response = await fetch(withDate('/next-best-action'), {headers: {Accept: 'application/json'}});
     if (!response.ok) throw new Error(`status ${response.status}`);
     const payload = await response.json();
     if (!Array.isArray(payload) || !payload.length) throw new Error('empty payload');
     actions = payload.map(toDashboardItem);
-    dataSource.textContent = `داده‌ی زنده از API · ${actions.length.toLocaleString('fa-IR')} مشتری`;
-    renderActions(document.querySelector('.filter[aria-current="true"]').dataset.filter);
+    liveMode = true;
+    dataSource.textContent = `داده‌ی زنده از API · ${actions.length.toLocaleString('fa-IR')} مشتری · تاریخ ارزیابی ${evalDate}`;
+    renderActions(currentFilter());
   };
   const loadLiveLoyalty = async () => {
     const [segments, journeys] = await Promise.all([
-      fetch('/loyalty/segments').then(response => response.ok ? response.json() : null),
-      fetch('/automation').then(response => response.ok ? response.json() : null)
+      fetch(withDate('/loyalty/segments')).then(response => response.ok ? response.json() : null).catch(() => null),
+      fetch('/automation').then(response => response.ok ? response.json() : null).catch(() => null)
     ]);
     if (segments) {
       const byCustomer = Object.fromEntries(segments.customers.map(profile => [profile.customer_id, profile]));
       actions = actions.map(item => ({...item, segment: byCustomer[item.id]?.rfm_segment, points: undefined}));
       renderSegments(segments.segment_counts);
     }
-    const points = await Promise.all(actions.slice(0, 25).map(item =>
-      fetch(`/loyalty/points?customer_id=${encodeURIComponent(item.id)}`).then(response => response.ok ? response.json() : null)));
-    actions.slice(0, 25).forEach((item, index) => { pointsByCustomer[item.id] = points[index]?.points_balance; });
     if (journeys && journeys.length) loyaltyStatus.textContent = `باشگاه مشتریان و ${journeys.length.toLocaleString('fa-IR')} مسیر خودکار از سرویس خوانده شد؛ منطق ساعت مجاز ۲۱ تا ۹ و سقف ۲ پیام در هفته فعال است.`;
-    renderActions(document.querySelector('.filter[aria-current="true"]').dataset.filter);
+    renderActions(currentFilter());
   };
   const customerSelect = document.querySelector('#customer-select');
   const customerSummary = document.querySelector('#customer-summary');
@@ -666,7 +751,7 @@
   const showCustomer = async id => {
     if (!id) return;
     selectedCustomerId = id;
-    const response = await fetch(`/customers/${encodeURIComponent(id)}?as_of=2026-07-24`).catch(() => null);
+    const response = await fetch(withDate(`/customers/${encodeURIComponent(id)}`)).catch(() => null);
     const data = response && response.ok ? await response.json() : null;
     if (!data) {
       customerSummary.textContent = 'برای دیدن پرونده، داشبورد را از همان API باز کنید.';
@@ -690,28 +775,28 @@
   document.querySelector('#customer-search').addEventListener('submit', async event => {
     event.preventDefault();
     const params = new URLSearchParams(new FormData(event.currentTarget));
-    const response = await fetch(`/customers?${params}`).catch(() => null);
+    const response = await fetch(withDate(`/customers?${params}`)).catch(() => null);
     customerDirectory = response && response.ok ? await response.json() : [];
     renderCustomerDirectory();
-    customerSummary.textContent = customerDirectory.length ? `${customerDirectory.length.toLocaleString('fa-IR')} مشتری پیدا شد.` : 'مشتری‌ای پیدا نشد.';
+    if (!customerDirectory.length) customerSummary.textContent = 'مشتری‌ای با این جست‌وجو پیدا نشد.';
   });
   customerSelect.addEventListener('change', event => showCustomer(event.target.value));
   document.querySelector('#customer-tags').addEventListener('submit', async event => {
     event.preventDefault();
     const tags = event.currentTarget.tags.value.split(',').map(tag => tag.trim()).filter(Boolean);
-    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/tags`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({tags})});
-    customerOperation.textContent = response.ok ? 'برچسب‌ها ذخیره شدند.' : 'ذخیره برچسب انجام نشد.';
+    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/tags`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({tags})}).catch(() => null);
+    customerOperation.textContent = response && response.ok ? 'برچسب‌ها ذخیره شدند.' : 'ذخیره برچسب انجام نشد.';
   });
   document.querySelector('#customer-referral').addEventListener('submit', async event => {
     event.preventDefault();
-    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/referrals`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({referred_id: event.currentTarget.referred_id.value})});
-    customerOperation.textContent = response.ok ? 'معرفی ثبت شد؛ پاداش تا تأیید سفارش صادر نمی‌شود.' : 'ثبت معرفی انجام نشد.';
+    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/referrals`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({referred_id: event.currentTarget.referred_id.value})}).catch(() => null);
+    customerOperation.textContent = response && response.ok ? 'معرفی ثبت شد؛ پاداش تا تأیید سفارش صادر نمی‌شود.' : 'ثبت معرفی انجام نشد.';
   });
   document.querySelector('#customer-feedback').addEventListener('submit', async event => {
     event.preventDefault();
     const body = {score: Number(event.currentTarget.score.value), comment: event.currentTarget.comment.value};
-    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/feedback`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
-    customerOperation.textContent = response.ok ? 'بازخورد ثبت شد.' : 'ثبت بازخورد انجام نشد.';
+    const response = await fetch(`/customers/${encodeURIComponent(selectedCustomerId)}/feedback`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}).catch(() => null);
+    customerOperation.textContent = response && response.ok ? 'بازخورد ثبت شد.' : 'ثبت بازخورد انجام نشد.';
     loadFeedbackSummary();
   });
   const loadFeedbackSummary = async () => {
@@ -720,10 +805,13 @@
     if (data) feedbackSummary.textContent = `NPS: ${data.nps ?? '—'} · پاسخ‌ها: ${data.responses.toLocaleString('fa-IR')} · مروجان: ${data.promoters.toLocaleString('fa-IR')}`;
   };
   const loadCustomers = async () => {
-    const response = await fetch('/customers').catch(() => null);
+    const response = await fetch(withDate('/customers')).catch(() => null);
     if (!response || !response.ok) return;
     customerDirectory = await response.json();
+    // The directory already carries points, so the dashboard avoids one request per customer.
+    customerDirectory.forEach(item => { pointsByCustomer[item.customer_id] = item.points; });
     renderCustomerDirectory();
+    renderActions(currentFilter());
     loadFeedbackSummary();
   };
   loadCustomers();

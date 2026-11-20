@@ -13,3 +13,5 @@
 ## [2026-10-18] update | Added competitor-standard features: RFM loyalty segments, points and wallet credit, coupons, automation journeys with quiet hours and weekly caps, scoped API tokens, HMAC-signed webhooks, branches, and the matching dashboard panels.
 
 ## [2026-10-26] update | Added customer 360, Persian search, tags, referral and feedback/NPS flows, dashboard customer desk, and removed tracked dependency artifacts.
+
+## [2026-11-20] update | Frontend: live campaign review actions, single `?as_of` evaluation date across the dashboard, fewer requests, default journey creation, and accessibility fixes.
